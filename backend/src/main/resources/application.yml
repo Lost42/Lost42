@@ -1,0 +1,39 @@
+ssh:
+  host: ${SSH_HOST}
+  private_key: ${PRIVATE_KEY}
+  ssh_port: ${SSH_PORT}
+  user: ${SSH_USER}
+  password: ${SSH_PASSWORD}
+
+42seoul:
+  client_id: ${42SEOUL_CLIENT_ID}
+  secret: ${42SEOUL_SECRET_ID}
+
+spring:
+  jpa:
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    open-in-view: false
+    generate-ddl: false
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+
+springdoc:
+  default-consumes-media-type: application/json;charset=UTF-8
+  default-produces-media-type: application/json;charset=UTF-8
+  swagger-ui:
+    path: /swagger
+    disable-swagger-default-url: true
+    display-request-duration: true
+    operations-sorter: alpha
+  api-docs:
+    groups:
+      enabled: true
+
+
