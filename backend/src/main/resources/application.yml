@@ -44,6 +44,15 @@ logging:
     org:
       springframework.security: DEBUG
 
+jwt:
+  secretKey: ${JWT_SECRET}
+  access:
+    expiration: 3600000 # 1시간(1000(ms) * 60(m) * 60(h))
+    header: Authorization
+  refresh:
+    expiration: 604800000 # 1주일(1000(ms) * 60(m) * 60(h) * 24(dday) * 7(week)
+    header: Authorization-refresh
+
 springdoc:
   default-consumes-media-type: application/json;charset=UTF-8
   default-produces-media-type: application/json;charset=UTF-8
