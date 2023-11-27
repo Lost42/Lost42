@@ -1,6 +1,7 @@
 package lost42.backend.domain.member.entity;
 
 import lombok.*;
+import lost42.backend.config.Auditable;
 import lost42.backend.config.auth.MemberRole;
 
 import javax.persistence.*;
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Getter
-public class Member {
+public class Member extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -46,4 +47,10 @@ public class Member {
         this.name = name;
         return this;
     }
+
+    public Member resetPassword(String password) {
+        this.password = password;
+        return this;
+    }
+
 }
