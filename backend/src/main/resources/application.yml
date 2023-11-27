@@ -12,7 +12,7 @@ spring:
     open-in-view: false
     generate-ddl: false
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     show-sql: true
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -46,7 +46,7 @@ jwt:
     expiration: 3600000 # 1시간(1000(ms) * 60(m) * 60(h))
     header: Authorization
   refresh:
-    expiration: 604800000 # 1주일(1000(ms) * 60(m) * 60(h) * 24(dday) * 7(week)
+    expiration: 604800000 # 1주일(1000(ms) * 60(m) * 60(h) * 24(day) * 7(week)
     header: Authorization-refresh
 
 springdoc:
