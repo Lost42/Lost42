@@ -1,7 +1,6 @@
 package lost42.backend.config.jwt.controller;
 
 import lombok.RequiredArgsConstructor;
-import lost42.backend.config.jwt.JwtService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,5 +20,11 @@ public class JwtController {
 //        response.setHeader("Authorization", token);
 
         return "Success";
+    }
+
+    @GetMapping("/token")
+    public ResponseEntity<?> getToken() {
+
+        return ResponseEntity.ok().body("");
     }
 }

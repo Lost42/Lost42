@@ -1,26 +1,20 @@
-package lost42.backend.config.jwt;
+package lost42.backend.config.jwt.provider;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import lombok.Builder;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
 @Slf4j
-@RequiredArgsConstructor
-@Service
-public class JwtService {
+public class TokenProvider {
     @Value("${jwt.secretKey}")
     private String secret;
 

@@ -27,8 +27,14 @@ public class Member {
     @Column(name = "password", length = 200)
     private String password;
 
+    @Column(name = "oauth_id", length = 100)
+    private Integer oauthId;
+
     @Column(name = "oauth_provider", length = 20)
     private String oauthProvider;
+
+    @Column(name = "refresh_token", length = 100)
+    private String refreshToken;
 
     @Column(name = "role", nullable = false)
     private MemberRole role;

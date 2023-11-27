@@ -13,16 +13,19 @@ public class OauthAttribute {
     private String nameAttributeKey;
     private String name;
     private String email;
+    private Integer oauthId;
 
     @Builder
     public OauthAttribute(Map<String, Object> attributes,
                           String nameAttributeKey,
                           String name,
-                          String email) {
+                          String email,
+                          Integer oauthId) {
         this.attributes = attributes;
         this.nameAttributeKey = nameAttributeKey;
         this.name = name;
         this.email = email;
+        this.oauthId = oauthId;
     }
 
     public static OauthAttribute of(String registrarionId,
@@ -36,6 +39,7 @@ public class OauthAttribute {
         return OauthAttribute.builder()
                 .name((String) attributes.get("login"))
                 .email((String) attributes.get("email"))
+                .oauthId((Integer) attributes.get("id"))
                 .attributes(attributes)
                 .nameAttributeKey(userNameAttributeName)
                 .build();
@@ -45,6 +49,7 @@ public class OauthAttribute {
         return Member.builder()
                 .name(name)
                 .email(email)
+                .oauthId(oauthId)
                 .oauthProvider("42Seoul")
                 .role(MemberRole.MEMBER)
                 .build();

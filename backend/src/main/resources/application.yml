@@ -5,10 +5,6 @@ ssh:
   user: ${SSH_USER}
   password: ${SSH_PASSWORD}
 
-42seoul:
-  client_id: ${42SEOUL_CLIENT_ID}
-  secret: ${42SEOUL_SECRET_ID}
-
 spring:
   jpa:
     database: mysql
