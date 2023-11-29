@@ -28,8 +28,7 @@ public class OauthAttribute {
         this.oauthId = oauthId;
     }
 
-    public static OauthAttribute of(String registrarionId,
-                                    String userNameAttributeName,
+    public static OauthAttribute of(String userNameAttributeName,
                                     Map<String, Object> attributes) {
         return of42(userNameAttributeName, attributes);
     }

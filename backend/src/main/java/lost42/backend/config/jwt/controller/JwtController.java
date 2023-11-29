@@ -1,6 +1,10 @@
 package lost42.backend.config.jwt.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import lost42.backend.config.auth.MemberRole;
+import lost42.backend.config.jwt.provider.TokenProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,14 +14,16 @@ import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/api/v1/jwt")
 public class JwtController {
-    private final JwtService jwtService;
+    private final TokenProvider tokenProvider;
 
     @GetMapping("/test")
     public String tokenTest(HttpServletResponse response) {
-//        String token = jwtService.createAccessToken();
-//        response.setHeader("Authorization", token);
+//        final String token = tokenProvider.generateAccessToken("test@example.com", MemberRole.MEMBER);
+//        log.warn("accessToken: {}", token);
+//        tokenProvider.getAuthentication(token);
 
         return "Success";
     }

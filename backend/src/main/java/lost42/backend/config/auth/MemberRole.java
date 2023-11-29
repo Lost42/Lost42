@@ -11,4 +11,19 @@ public enum MemberRole {
 
     private final String key;
     private final String title;
+
+    @Override
+    public String toString() {
+        return String.format("role: %s", this.key);
+    }
+
+    public static MemberRole fromString(String key) {
+        String roleKey = "ROLE_" + key;
+        for (MemberRole role : MemberRole.values()) {
+            if (role.getKey().equals(roleKey)) {
+                return role;
+            }
+        }
+        throw new IllegalArgumentException("No such role with key: " + roleKey);
+    }
 }

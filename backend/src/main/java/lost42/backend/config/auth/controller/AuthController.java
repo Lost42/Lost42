@@ -1,21 +1,23 @@
 package lost42.backend.config.auth.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import lost42.backend.config.auth.dto.CustomUserDetails;
 import lost42.backend.config.auth.service.AuthService;
-import net.minidev.json.JSONObject;
+import lost42.backend.config.jwt.provider.TokenProvider;
+import lost42.backend.domain.member.dto.LoginReq;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.Cookie;
 import java.net.URI;
 
 @RestController
@@ -25,6 +27,9 @@ import java.net.URI;
 @Slf4j
 public class AuthController {
     private final AuthService authService;
+    private final AuthenticationManager authenticationManager;
+    private final TokenProvider tokenProvider;
+
 
     @Value("${spring.security.oauth2.client.registration.42Seoul.client-id}")
     private String clientId;
@@ -44,7 +49,30 @@ public class AuthController {
     @Value("${spring.security.oauth2.client.provider.42Seoul.user-info-uri}")
     private String userInfoUri;
 
-    // http://localhost:8080/login/oauth2/code/42Seoul
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginReq req) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(req.getUserEmail(), req.getUserPassword())
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        CustomUserDetails securityUser = (CustomUserDetails) authentication.getPrincipal();
+
+        String accessToken = tokenProvider.generateAccessToken(authentication);
+        String refreshToken = tokenProvider.generateRefreshToken(authentication);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+                .path("/")
+                .httpOnly(true)
+                .secure(true)
+                .build();
+
+        return ResponseEntity.ok().headers(headers).header("Set-Cookie", cookie.toString()).body("");
+    }
+
+//     http://localhost:8080/login/oauth2/code/42Seoul
     @GetMapping("/login/42") // 임시로, 나중에 프론트에서 httPs://localhost:8080/oauth2/authorization/42Seoul 링크로 접속하게 설정
     public ResponseEntity<?> FortyTwoOauthLogin() {
         final String authorizeUrl = String.format("%s?client_id=%s&redirect_uri=%s&response_type=code&scope=public&state=veryverylonglongnumber", authorizationUri, clientId, redirectUri);

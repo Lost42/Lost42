@@ -24,15 +24,14 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        log.warn("This is loadUser");
         OAuth2UserService delegate = new DefaultOAuth2UserService();
         OAuth2User oAuth2User = delegate.loadUser(userRequest);
 
-        String registrationId = userRequest.getClientRegistration().getRegistrationId();
+//        String registrationId = userRequest.getClientRegistration().getRegistrationId(); -> oauth 시스템을 확장하게 되면 쓸 것
         String userNameAttributeName = userRequest.getClientRegistration()
                 .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
 
-        OauthAttribute attributes = OauthAttribute.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
+        OauthAttribute attributes = OauthAttribute.of(userNameAttributeName, oAuth2User.getAttributes());
 
         Member member = saveOrUpdate(attributes);
 

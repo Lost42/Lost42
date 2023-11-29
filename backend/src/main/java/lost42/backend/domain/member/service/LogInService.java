@@ -23,8 +23,6 @@ public class LogInService {
         Member member = memberRepository.findByEmail(req.getUserEmail())
                 .orElseThrow(() -> new EntityNotFoundException("일치하는 회원 없음"));
 
-        String accessToken = tokenProvider.generateAccessToken(req.getUserEmail());
-        String refreshToken = tokenProvider.generateRefreshToken(req.getUserEmail());
 
         return SuccessResponse.noContent();
     }
