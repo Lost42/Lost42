@@ -34,6 +34,8 @@ spring:
             token-uri: https://api.intra.42.fr/oauth/token
             user-info-uri: https://api.intra.42.fr/v2/me
             user-name-attribute: login
+  main:
+    allow-bean-definition-overriding: true
 
 logging:
   level:
@@ -41,13 +43,13 @@ logging:
       springframework.security: DEBUG
 
 jwt:
-  secretKey: ${JWT_SECRET}
-  access:
-    expiration: 3600000 # 1시간(1000(ms) * 60(m) * 60(h))
-    header: Authorization
-  refresh:
-    expiration: 604800000 # 1주일(1000(ms) * 60(m) * 60(h) * 24(day) * 7(week)
-    header: Authorization-refresh
+  secret:
+    access-secret-key: ${JWT_ACCESS_SECRET}
+    refresh-secret-key: ${JWT_REFRESH_SECRET}
+  token:
+      access-expiration: 3600000 # 1시간(1000(ms) * 60(m) * 60(h))
+      access-header: Authorization
+      refresh-expiration: 604800000 # 1주일(1000(ms) * 60(m) * 60(h) * 24(day) * 7(week)
 
 springdoc:
   default-consumes-media-type: application/json;charset=UTF-8
