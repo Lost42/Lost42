@@ -1,6 +1,7 @@
 {
   "parserOptions": {
-    "ecmaVersion": "latest"
+    "ecmaVersion": "latest",
+    "project": ["./tsconfig.json"]
   },
   "env": {
     "browser": true,
@@ -8,9 +9,21 @@
     "commonjs": true,
     "es2022": true
   },
+  "parser": "@typescript-eslint/parser",
   "globals": { "_": true },
   "plugins": ["import", "html"],
-  "extends": ["airbnb-base", "prettier"],
+  "extends": ["airbnb-base", "airbnb-typescript/base", "prettier"],
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "import/resolver": {
+      "typescript": {
+        "alwaysTryTypes": true,
+        "project": "./tsconfig.json"
+      }
+    }
+  },
   "rules": {
     // "off" or 0 - turn the rule off
     // "warn" or 1 - turn the rule on as a warning (doesn’t affect exit code)
