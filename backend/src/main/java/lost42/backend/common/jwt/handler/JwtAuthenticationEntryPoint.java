@@ -1,4 +1,4 @@
-package lost42.backend.config.jwt.handler;
+package lost42.backend.common.jwt.handler;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;

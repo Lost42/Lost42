@@ -3,7 +3,7 @@ package lost42.backend.domain.member.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lost42.backend.common.Response.SuccessResponse;
-import lost42.backend.config.jwt.provider.TokenProvider;
+import lost42.backend.common.jwt.provider.TokenProvider;
 import lost42.backend.domain.member.dto.LoginReq;
 import lost42.backend.domain.member.entity.Member;
 import lost42.backend.domain.member.repository.MemberRepository;
@@ -26,4 +26,5 @@ public class LogInService {
 
         return SuccessResponse.noContent();
     }
+
 }

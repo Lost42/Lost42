@@ -1,7 +1,7 @@
 package lost42.backend.config;
 
-import lost42.backend.config.jwt.JwtProperties;
-import lost42.backend.config.jwt.provider.TokenProvider;
+import lost42.backend.common.jwt.JwtProperties;
+import lost42.backend.common.jwt.provider.TokenProvider;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

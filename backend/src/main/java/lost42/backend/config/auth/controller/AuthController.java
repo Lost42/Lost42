@@ -1,13 +1,14 @@
 package lost42.backend.config.auth.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import lost42.backend.common.jwt.dto.JwtTokenInfo;
 import lost42.backend.config.auth.dto.CustomUserDetails;
 import lost42.backend.config.auth.service.AuthService;
-import lost42.backend.config.jwt.provider.TokenProvider;
+import lost42.backend.common.jwt.provider.TokenProvider;
 import lost42.backend.domain.member.dto.LoginReq;
-import org.springframework.beans.factory.annotation.Value;
+import lost42.backend.domain.member.entity.Member;
+import lost42.backend.domain.member.repository.MemberRepository;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +18,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.Cookie;
-import java.net.URI;
-
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -28,6 +26,7 @@ import java.net.URI;
 public class AuthController {
     private final AuthService authService;
     private final AuthenticationManager authenticationManager;
+    private final MemberRepository memberRepository;
     private final TokenProvider tokenProvider;
 
     @PostMapping("/login")
@@ -37,8 +36,10 @@ public class AuthController {
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String accessToken = tokenProvider.generateAccessToken(authentication);
-        String refreshToken = tokenProvider.generateRefreshToken(authentication);
+        JwtTokenInfo tokenInfo = JwtTokenInfo.fromCustomUserDetails((CustomUserDetails) authentication.getPrincipal());
+
+        String accessToken = tokenProvider.generateAccessToken(tokenInfo);
+        String refreshToken = tokenProvider.generateRefreshToken(tokenInfo);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + accessToken);

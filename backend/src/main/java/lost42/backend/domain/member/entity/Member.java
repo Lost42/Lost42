@@ -48,6 +48,12 @@ public class Member extends Auditable {
         return this;
     }
 
+    public Member changePassword(String password) {
+        this.password = password;
+        return this;
+    }
+
+
     public Member resetPassword(String password) {
         this.password = password;
         return this;

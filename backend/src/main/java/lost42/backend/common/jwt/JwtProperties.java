@@ -1,4 +1,4 @@
-package lost42.backend.config.jwt;
+package lost42.backend.common.jwt;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

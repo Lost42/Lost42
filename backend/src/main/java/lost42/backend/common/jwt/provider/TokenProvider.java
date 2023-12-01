@@ -1,4 +1,4 @@
-package lost42.backend.config.jwt.provider;
+package lost42.backend.common.jwt.provider;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lost42.backend.common.jwt.dto.JwtTokenInfo;
 import lost42.backend.config.auth.MemberRole;
 import lost42.backend.config.auth.dto.CustomUserDetails;
 import lost42.backend.domain.member.entity.Member;
@@ -49,78 +50,31 @@ public class TokenProvider {
     /**
      *  accessToken 생성, 안쪽 정보 (email, role)
      */
-    public String generateAccessToken(Authentication authentication) {
-        String email, role;
-        log.warn("TokenProvider Authentication: {}", authentication);
-
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof CustomUserDetails) {
-            CustomUserDetails securityUser = (CustomUserDetails) principal;
-
-            email = securityUser.getUserEmail();
-            role = securityUser.getAuthorities().iterator().next().getAuthority().substring("ROLE_".length());
-        } else if (principal instanceof OAuth2User) {
-            OAuth2User securityUser = (OAuth2User) principal;
-
-            email = securityUser.getAttribute("email");
-            role = securityUser.getAuthorities().iterator().next().getAuthority().substring("ROLE_".length());
-        } else {
-            throw new IllegalArgumentException("UnSupported Principal Type.");
-        }
-
-        Map<String, Object> headers = new HashMap<>();
-
-        headers.put("typ", "JWT");
-        headers.put("alg", "HS256");
-
-        Date expireDate = new Date();
-        expireDate.setTime(expireDate.getTime() + accessExpiration);
-
-        String accessToken = Jwts.builder()
+    public String generateAccessToken(JwtTokenInfo tokenInfo) {
+        return Jwts.builder()
                 .header()
-                    .add(headers)
+                .add(createHeaders())
                 .and()
-                .issuer("lost42")
-                .subject("lost42-access")
-                .claim("email", email)
-                .claim("role", role)
-                .expiration(expireDate)
+                .claims(createClaims("lost42-access", tokenInfo))
+                .expiration(createExpiration(accessExpiration))
                 .issuedAt(new Date())
                 .signWith(accessSecretKey)
                 .compact();
-
-        return accessToken;
     }
 
     /**
      * refreshToken 생성, 안쪽 정보(email, role)
      */
-    // TODO 추후 accessToken과 같이 변경
-    public String generateRefreshToken(Authentication authentication) {
-        CustomUserDetails securityUser = (CustomUserDetails) authentication.getPrincipal();
-
-        Map<String, Object> headers = new HashMap<>();
-
-        headers.put("typ", "JWT");
-        headers.put("alg", "HS256");
-
-        Date expireDate = new Date();
-        expireDate.setTime(expireDate.getTime() + refreshExpiration);
-
-        String refreshToken = Jwts.builder()
+    public String generateRefreshToken(JwtTokenInfo tokenInfo) {
+        return Jwts.builder()
                 .header()
-                    .add(headers)
+                .add(createHeaders())
                 .and()
-                .issuer("lost42")
-                .subject("lost42-refresh")
-                .claim("email", securityUser.getUserEmail())
-                .claim("role", securityUser.getAuthorities().iterator().next().getAuthority().substring("ROLE_".length()))
-                .expiration(expireDate)
+                .claims(createClaims("lost42-refresh", tokenInfo))
+                .expiration(createExpiration(refreshExpiration))
                 .issuedAt(new Date())
-                .signWith(refreshSecretKey)
+                .signWith(accessSecretKey)
                 .compact();
-
-        return refreshToken;
     }
 
     /**
@@ -130,22 +84,14 @@ public class TokenProvider {
         Claims claims = Jwts.parser().verifyWith(accessSecretKey).build()
                 .parseSignedClaims(token).getPayload();
 
-        if (!claims.getSubject().equals("lost42-access")) {
-            return false;
-        }
-
-        return true;
+        return claims.getSubject().equals("lost42-access");
     }
 
     public boolean validateRefreshToken(String token) {
-        Jwts.parser().decryptWith(refreshSecretKey)
-                .build()
-                .parseSignedClaims("email")
-                .getPayload()
-                .getSubject()
-                .equals("lost42-refresh");
+        Claims claims = Jwts.parser().verifyWith(refreshSecretKey).build()
+                .parseSignedClaims(token).getPayload();
 
-        return true;
+        return claims.getSubject().equals("lost42-refresh");
     }
 
     /**
@@ -159,5 +105,33 @@ public class TokenProvider {
 
         String email = claims.get("email", String.class);
         return email;
+    }
+
+    public Map<String, Object> createHeaders() {
+        Map<String, Object> headers = new HashMap<>();
+
+        headers.put("typ", "JWT");
+        headers.put("alg", "HS256");
+
+        return headers;
+    }
+
+    public Date createExpiration(Long duration) {
+        Date expireDate = new Date();
+
+        expireDate.setTime(expireDate.getTime() + duration);
+        return expireDate;
+    }
+
+    public Map<String, Object> createClaims(String subject, JwtTokenInfo tokenInfo) {
+        Map<String, Object> claims = new HashMap<>();
+
+        claims.put("iss", "lost42");
+        claims.put("sub", subject);
+        claims.put("id", tokenInfo.getMemberId());
+        claims.put("role", tokenInfo.getRole());
+        claims.put(tokenInfo.getOauthProvider() + "Id", tokenInfo.getOauthId());
+
+        return claims;
     }
 }

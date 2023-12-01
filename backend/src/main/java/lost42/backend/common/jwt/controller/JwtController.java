@@ -1,10 +1,8 @@
-package lost42.backend.config.jwt.controller;
+package lost42.backend.common.jwt.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lost42.backend.config.auth.MemberRole;
-import lost42.backend.config.jwt.provider.TokenProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import lost42.backend.common.jwt.provider.TokenProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

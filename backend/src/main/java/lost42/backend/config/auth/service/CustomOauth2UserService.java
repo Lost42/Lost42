@@ -2,6 +2,7 @@ package lost42.backend.config.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lost42.backend.config.auth.dto.CustomOAuth2User;
 import lost42.backend.config.auth.dto.OauthAttribute;
 import lost42.backend.domain.member.entity.Member;
 import lost42.backend.domain.member.repository.MemberRepository;
@@ -35,10 +36,14 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         Member member = saveOrUpdate(attributes);
 
-        return new DefaultOAuth2User(
+        attributes.updateMemberId(member.getMemberId());
+
+        return new CustomOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority(member.getRole().getKey())),
                 attributes.getAttributes(),
-                attributes.getNameAttributeKey()
+                attributes.getNameAttributeKey(),
+                attributes.getMemberId(),
+                attributes.getOauthProvider()
         );
     }
 

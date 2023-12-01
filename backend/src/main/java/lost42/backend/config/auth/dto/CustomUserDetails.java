@@ -2,6 +2,7 @@ package lost42.backend.config.auth.dto;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.Getter;
+import lost42.backend.config.auth.MemberRole;
 import lost42.backend.domain.member.entity.Member;
 import net.minidev.json.annotate.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
@@ -10,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Getter
@@ -19,7 +21,11 @@ public class CustomUserDetails implements UserDetails {
     @JsonIgnore
     private String password;
     @JsonIgnore
-    private String userEmail;
+    private Long memberId;
+    @JsonIgnore
+    private String oauthProvider;
+    @JsonIgnore
+    private Integer oauthId;
     @JsonIgnore
     private Collection<? extends GrantedAuthority> authorities;
     @JsonIgnore
@@ -34,7 +40,9 @@ public class CustomUserDetails implements UserDetails {
     public CustomUserDetails(Member member) {
         this.username = member.getName();
         this.password = member.getPassword();
-        this.userEmail = member.getEmail();
+        this.memberId = member.getMemberId();
+        this.oauthProvider = member.getOauthProvider();
+        this.oauthId = member.getOauthId();
         this.authorities = Arrays.stream(new String[]{member.getRole().getKey()})
                 .map(role -> new SimpleGrantedAuthority(role))
                 .collect(Collectors.toList());

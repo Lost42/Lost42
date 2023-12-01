@@ -1,7 +1,7 @@
 package lost42.backend.config.security;
 
 import lombok.RequiredArgsConstructor;
-import lost42.backend.config.jwt.filter.CustomJwtFilter;
+import lost42.backend.common.jwt.filter.CustomJwtFilter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
