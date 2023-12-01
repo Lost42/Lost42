@@ -2,9 +2,11 @@ package lost42.backend.config.security;
 
 import lombok.RequiredArgsConstructor;
 //import lost42.backend.config.auth.hadler.OAuth2SuccessHandler;
+import lost42.backend.config.JwtConfig;
 import lost42.backend.config.auth.hadler.OAuth2SuccessHandler;
 import lost42.backend.config.auth.service.CustomOauth2UserService;
 import lost42.backend.config.auth.service.CustomUserDetailsService;
+import lost42.backend.config.jwt.filter.CustomJwtFilter;
 import lost42.backend.config.jwt.handler.JwtAccessDeniedHandler;
 import lost42.backend.config.jwt.handler.JwtAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +21,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -34,6 +37,8 @@ public class SecurityConfig {
     private final CustomOauth2UserService customOauth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final JwtSecurity jwtSecurity;
+    private final CustomUserDetailsService customUserDetailsService;
     private final String[] ignoreUrl = {
             "/", "/favicon.ico",
             "/oauth2/**", "/login/oauth2/**",
@@ -59,7 +64,10 @@ public class SecurityConfig {
                 .httpBasic().disable()
                 .authorizeRequests(authorize ->
                         authorize.antMatchers(ignoreUrl).permitAll()
-                                .anyRequest().authenticated())
+                                .anyRequest().authenticated()
+                )
+                .apply(jwtSecurity)
+                .and()
                 .oauth2Login()
                     .successHandler(oAuth2SuccessHandler)
                     .userInfoEndpoint().userService(customOauth2UserService);

@@ -25,14 +25,12 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        log.warn("This is SuccessHandler");
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-//        String accessToken = tokenProvider.generateAccessToken(oAuth2User.getAttribute("id"), MemberRole.MEMBER);
+        String accessToken = tokenProvider.generateAccessToken(authentication);
 
-//        Cookie cookie = setRefreshTokenToCookie(request, oAuth2User);
-//        response.addHeader("Authorization", "Bearer " + accessToken);
-//        response.addCookie(cookie);
-        response.sendRedirect("http://localhost:8080/api/v1/jwt/token");
+        // TODO Refresh 토큰 발급 이후 쿠키에 담는 과정 추가해야함
+        response.addHeader("Authorization", "Bearer " + accessToken);
+        response.sendRedirect("http://localhost:3000");
     }
 
     public void setRefreshTokenToCookie(HttpServletRequest request ,OAuth2User oAuth2User) {

@@ -15,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -49,7 +50,23 @@ public class TokenProvider {
      *  accessToken 생성, 안쪽 정보 (email, role)
      */
     public String generateAccessToken(Authentication authentication) {
-        CustomUserDetails securityUser = (CustomUserDetails) authentication.getPrincipal();
+        String email, role;
+        log.warn("TokenProvider Authentication: {}", authentication);
+
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomUserDetails) {
+            CustomUserDetails securityUser = (CustomUserDetails) principal;
+
+            email = securityUser.getUserEmail();
+            role = securityUser.getAuthorities().iterator().next().getAuthority().substring("ROLE_".length());
+        } else if (principal instanceof OAuth2User) {
+            OAuth2User securityUser = (OAuth2User) principal;
+
+            email = securityUser.getAttribute("email");
+            role = securityUser.getAuthorities().iterator().next().getAuthority().substring("ROLE_".length());
+        } else {
+            throw new IllegalArgumentException("UnSupported Principal Type.");
+        }
 
         Map<String, Object> headers = new HashMap<>();
 
@@ -65,8 +82,8 @@ public class TokenProvider {
                 .and()
                 .issuer("lost42")
                 .subject("lost42-access")
-                .claim("email", securityUser.getUserEmail())
-                .claim("role", securityUser.getAuthorities().iterator().next().getAuthority().substring("ROLE_".length()))
+                .claim("email", email)
+                .claim("role", role)
                 .expiration(expireDate)
                 .issuedAt(new Date())
                 .signWith(accessSecretKey)
@@ -78,6 +95,7 @@ public class TokenProvider {
     /**
      * refreshToken 생성, 안쪽 정보(email, role)
      */
+    // TODO 추후 accessToken과 같이 변경
     public String generateRefreshToken(Authentication authentication) {
         CustomUserDetails securityUser = (CustomUserDetails) authentication.getPrincipal();
 
@@ -109,12 +127,12 @@ public class TokenProvider {
      * 액세스 토큰 유효성 검증
      */
     public boolean validateAccessToken(String token) {
-        Jwts.parser().decryptWith(accessSecretKey)
-                .build()
-                .parseSignedClaims("email")
-                .getPayload()
-                .getSubject()
-                .equals("lost42-access");
+        Claims claims = Jwts.parser().verifyWith(accessSecretKey).build()
+                .parseSignedClaims(token).getPayload();
+
+        if (!claims.getSubject().equals("lost42-access")) {
+            return false;
+        }
 
         return true;
     }
@@ -133,25 +151,13 @@ public class TokenProvider {
     /**
      * token을 Authentication 객체로 변환
      */
-    public Authentication getAuthentication(String token) {
+    public String getEmail(String token) {
         Claims claims = Jwts.parser().verifyWith(accessSecretKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
 
         String email = claims.get("email", String.class);
-        String role = claims.get("role", String.class);
-
-        Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(role.toString().split(","))
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
-
-        Member principal = Member.builder()
-                .email(email)
-                .role(MemberRole.fromString(role))
-                .build();
-
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+        return email;
     }
 }

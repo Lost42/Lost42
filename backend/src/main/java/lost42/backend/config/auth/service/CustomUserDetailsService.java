@@ -21,6 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String userEmail) throws UsernameNotFoundException {
+        log.info("Custom User Details Service Location");
         Member member = memberRepository.findByEmail(userEmail).orElse(null); // TODO 공통 에러 핸들링으로 적용
         if (member == null) {
             throw new EntityNotFoundException("member does not exist");
