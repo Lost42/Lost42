@@ -2,7 +2,7 @@ package lost42.backend.domain.member.entity;
 
 import lombok.*;
 import lost42.backend.config.Auditable;
-import lost42.backend.config.auth.MemberRole;
+import lost42.backend.common.auth.MemberRole;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

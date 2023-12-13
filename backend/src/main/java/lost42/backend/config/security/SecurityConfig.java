@@ -1,10 +1,8 @@
 package lost42.backend.config.security;
 
 import lombok.RequiredArgsConstructor;
-//import lost42.backend.config.auth.hadler.OAuth2SuccessHandler;
-import lost42.backend.config.auth.hadler.OAuth2SuccessHandler;
-import lost42.backend.config.auth.service.CustomOauth2UserService;
-import lost42.backend.config.auth.service.CustomUserDetailsService;
+import lost42.backend.common.auth.hadler.OAuth2SuccessHandler;
+import lost42.backend.common.auth.service.CustomOauth2UserService;
 import lost42.backend.common.jwt.handler.JwtAccessDeniedHandler;
 import lost42.backend.common.jwt.handler.JwtAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
@@ -33,14 +31,14 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtSecurity jwtSecurity;
-    private final CustomUserDetailsService customUserDetailsService;
     private final String[] ignoreUrl = {
             "/", "/favicon.ico",
             "/oauth2/**", "/login/oauth2/**",
             "/swagger", "/swagger-ui/**", "/v3/api-docs/**",
-            "/api/v1/members/test", "/api/v1/members/signup",
+            "/api/v1/members/signup",
             "/api/v1/members/find-email", "/api/v1/members/find-password",
-            "/api/v1/members/reset-password", "/api/v1/auth/login"
+            "/api/v1/members/reset-password", "/api/v1/members/signin",
+            "/api/v1/jwt/test"
     };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {

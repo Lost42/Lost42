@@ -4,19 +4,18 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lost42.backend.common.Response.SuccessResponse;
-import lost42.backend.config.auth.dto.CustomUserDetails;
+import lost42.backend.common.auth.dto.CustomUserDetails;
 import lost42.backend.domain.member.dto.*;
 import lost42.backend.domain.member.service.LogInService;
 import lost42.backend.domain.member.service.MemberService;
 import lost42.backend.domain.member.service.SignUpService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.security.Principal;
 
 
 @RestController
@@ -39,14 +38,24 @@ public class MemberController {
 
     @GetMapping("/my")
     public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
-        memberService.getUserInfo(securityUser);
-
-        return ResponseEntity.ok().body(memberService.getUserInfo(securityUser));
+        return ResponseEntity.ok().body(SuccessResponse.from(memberService.getUserInfo(securityUser)));
     }
 
     @PostMapping("/signin")
     public ResponseEntity<?> login(@RequestBody LoginReq req) {
-        return ResponseEntity.ok().body(logInService.login(req));
+        String[] tokens= logInService.login(req);
+
+        String accessToken = tokens[0];
+        String refreshToken = tokens[1];
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+                .path("/")
+                .httpOnly(true)
+                .secure(true)
+                .build();
+
+        return ResponseEntity.ok().headers(headers).header("Set-Cookie", cookie.toString()).body("");
     }
 
     @PostMapping("/signup")

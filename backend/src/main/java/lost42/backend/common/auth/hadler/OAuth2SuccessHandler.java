@@ -1,10 +1,10 @@
-package lost42.backend.config.auth.hadler;
+package lost42.backend.common.auth.hadler;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lost42.backend.common.jwt.dto.JwtTokenInfo;
 import lost42.backend.common.jwt.provider.TokenProvider;
-import lost42.backend.config.auth.dto.CustomOAuth2User;
+import lost42.backend.common.auth.dto.CustomOAuth2User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;

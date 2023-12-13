@@ -1,4 +1,4 @@
-package lost42.backend.config.auth.dto;
+package lost42.backend.common.auth.dto;
 
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;

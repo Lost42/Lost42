@@ -1,10 +1,6 @@
 package lost42.backend.common.jwt;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import lost42.backend.config.JwtConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data

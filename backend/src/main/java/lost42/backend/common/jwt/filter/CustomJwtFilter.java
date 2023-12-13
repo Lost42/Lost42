@@ -1,15 +1,23 @@
 package lost42.backend.common.jwt.filter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lost42.backend.common.Response.ErrorResponse;
+import lost42.backend.common.jwt.JwtTokenUtil;
+import lost42.backend.common.jwt.dto.JwtTokenInfo;
 import lost42.backend.common.jwt.provider.TokenProvider;
-import lost42.backend.config.auth.service.CustomUserDetailsService;
+import lost42.backend.common.redis.refreshtoken.RefreshTokenService;
+import lost42.backend.common.auth.dto.CustomUserDetails;
+import lost42.backend.common.auth.exception.AuthErrorCode;
+import lost42.backend.common.auth.exception.AuthErrorException;
+import lost42.backend.common.auth.service.CustomUserDetailsService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -26,13 +34,16 @@ import java.util.regex.Pattern;
 @Slf4j
 public class CustomJwtFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService customUserDetailsService;
-    public static final String AUTHORIZATION_HEADER = "Authorization";
+    private final JwtTokenUtil jwtTokenUtil;
+    private final TokenProvider tokenProvider;
+    private final RefreshTokenService refreshTokenService;
+
     private final List<String> jwtIgnoreUrl = List.of(
             "/swagger", "/swagger-ui/**", "/v3/api-docs/**",
-            "/api/v1/auth/login", "/oauth2/**"
+            "/api/v1/members/signin", "/oauth2/**", "/api/v1/members/signup",
+            "/api/v1/jwt/test"
     );
 
-    private final TokenProvider tokenProvider;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -42,20 +53,40 @@ public class CustomJwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        log.warn("Request: {}", request);
-        String accessToken = resolveToken(request);
+        log.info("Request: {}", request);
+        String accessToken = jwtTokenUtil.resolveAccessToken(request);
+        String refreshToken = jwtTokenUtil.resolveRefreshToken(request);
 
-        UserDetails userDetails = getUserDetails(accessToken);
-        authenticationUser(userDetails, request);
-        filterChain.doFilter(request, response);
-    }
-
-    private String resolveToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+        if (accessToken != null) {
+            CustomUserDetails securityUser = (CustomUserDetails) getUserDetails(accessToken);
+            if (securityUser == null) {
+                handleAuthErrorException(response, AuthErrorCode.USER_NOT_FOUND);
+                return;
+            }
+            if (jwtTokenUtil.validateAccessToken(accessToken, securityUser)) {
+                setAuthenticationUser(securityUser, request);
+            } else {
+                boolean isValid = jwtTokenUtil.validateRefreshToken(refreshToken, securityUser);
+                boolean isExist = refreshTokenService.isValidRefreshToken(refreshToken);
+                if (isValid && isExist) {
+                    JwtTokenInfo tokenInfo = JwtTokenInfo.fromCustomUserDetails(securityUser);
+                    String newAccessToken = tokenProvider.generateAccessToken(tokenInfo);
+                    response.setHeader("Authorization", "bearer " + newAccessToken);
+                    setAuthenticationUser(securityUser, request);
+                } else if (!isValid) {
+                    handleAuthErrorException(response, AuthErrorCode.USER_NOT_FOUND);
+                    return;
+                } else if (!isExist) {
+                    handleAuthErrorException(response, AuthErrorCode.INVALID_REFRESH_TOKEN);
+                    return;
+                }
+            }
+        } else {
+            handleAuthErrorException(response, AuthErrorCode.EMPTY_ACCESS_TOKEN);
+            return;
         }
-        return null;
+
+        filterChain.doFilter(request, response);
     }
 
     private boolean ignoreTokenRequest(HttpServletRequest request) {
@@ -68,15 +99,15 @@ public class CustomJwtFilter extends OncePerRequestFilter {
 
                 )
                 .findFirst();
-        return !judge.isEmpty() || "OPTIONS".equals(method);
+        return judge.isPresent() || "OPTIONS".equals(method);
     }
 
     private UserDetails getUserDetails(String accessToken) {
-        String email = tokenProvider.getEmail(accessToken);
-        return customUserDetailsService.loadUserByUsername(email);
+        Long memberId = tokenProvider.getIdWithAccessToken(accessToken);
+        return customUserDetailsService.loadUserByMemberId(memberId);
     }
 
-    private void authenticationUser(UserDetails userDetails, HttpServletRequest request) {
+    private void setAuthenticationUser(CustomUserDetails userDetails, HttpServletRequest request) {
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities()
         );
@@ -84,5 +115,18 @@ public class CustomJwtFilter extends OncePerRequestFilter {
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         log.info("Authenticated user: {}", userDetails.getUsername());
+    }
+
+    /**
+     * JwtFilter 내에서 에러 발생 시 에러 응답 반환
+     */
+    private void handleAuthErrorException(HttpServletResponse response, AuthErrorCode errorCode) throws IOException {
+        response.setStatus(errorCode.getHttpStatus().value());
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        log.warn("JwtFilter Error: {}", errorCode.getMessage());
+
+        String json = new ObjectMapper().writeValueAsString(ErrorResponse.of(errorCode.getMessage()));
+        response.getWriter().write(json);
     }
 }

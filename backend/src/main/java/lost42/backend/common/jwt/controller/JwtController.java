@@ -17,15 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 public class JwtController {
     private final TokenProvider tokenProvider;
 
-    @GetMapping("/test")
-    public String tokenTest(HttpServletResponse response) {
-//        final String token = tokenProvider.generateAccessToken("test@example.com", MemberRole.MEMBER);
-//        log.warn("accessToken: {}", token);
-//        tokenProvider.getAuthentication(token);
-
-        return "Success";
-    }
-
     @GetMapping("/token")
     public ResponseEntity<?> getToken() {
 

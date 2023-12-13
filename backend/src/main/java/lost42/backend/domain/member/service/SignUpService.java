@@ -3,7 +3,7 @@ package lost42.backend.domain.member.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lost42.backend.common.Response.SuccessResponse;
-import lost42.backend.config.auth.MemberRole;
+import lost42.backend.common.auth.MemberRole;
 import lost42.backend.domain.member.dto.SignUpReq;
 import lost42.backend.domain.member.dto.SignUpRes;
 import lost42.backend.domain.member.entity.Member;

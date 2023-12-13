@@ -1,8 +1,6 @@
-package lost42.backend.config.auth.dto;
+package lost42.backend.common.auth.dto;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import lombok.Getter;
-import lost42.backend.config.auth.MemberRole;
 import lost42.backend.domain.member.entity.Member;
 import net.minidev.json.annotate.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Getter

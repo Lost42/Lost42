@@ -1,4 +1,4 @@
-package lost42.backend.config.auth;
+package lost42.backend.common.auth;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

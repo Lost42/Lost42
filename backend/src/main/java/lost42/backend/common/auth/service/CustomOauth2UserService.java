@@ -1,9 +1,9 @@
-package lost42.backend.config.auth.service;
+package lost42.backend.common.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lost42.backend.config.auth.dto.CustomOAuth2User;
-import lost42.backend.config.auth.dto.OauthAttribute;
+import lost42.backend.common.auth.dto.CustomOAuth2User;
+import lost42.backend.common.auth.dto.OauthAttribute;
 import lost42.backend.domain.member.entity.Member;
 import lost42.backend.domain.member.repository.MemberRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,7 +11,6 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 

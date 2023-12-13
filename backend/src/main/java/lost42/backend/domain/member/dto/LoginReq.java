@@ -14,8 +14,10 @@ import javax.validation.constraints.Pattern;
 @Schema(description = "로그인 요청 DTO")
 public class LoginReq {
     @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$", message = "유효한 이메일 주소 형식이 아닙니다.")
+    @Schema(description = "이메일 아이디", example = "test@example.com")
     public String userEmail;
     
     @NotBlank
+    @Schema(description = "비밀번호", example = "1q2w3e4r!@#")
     public String userPassword;
 }
