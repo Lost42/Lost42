@@ -56,7 +56,7 @@ public class JwtTokenUtil {
      * 액세스 토큰을 이용
      */
     // 토큰의 유효성 검사
-    public Boolean validateAccessToken(String accessToken, CustomUserDetails userDetails) {
+    public boolean validateAccessToken(String accessToken, CustomUserDetails userDetails) {
         final Long memberId = extractMemberIdWithAccessToken(accessToken);
         return (memberId == userDetails.getMemberId() && !isTokenExpiredWithAccessToken(accessToken));
     }

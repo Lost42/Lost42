@@ -5,7 +5,9 @@ import lost42.backend.config.Auditable;
 import lost42.backend.common.auth.MemberRole;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -56,6 +58,11 @@ public class Member extends Auditable {
 
     public Member resetPassword(String password) {
         this.password = password;
+        return this;
+    }
+
+    public Member withdrawal() {
+        this.deletedDt = LocalDateTime.now();
         return this;
     }
 

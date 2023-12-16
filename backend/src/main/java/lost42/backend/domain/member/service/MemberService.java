@@ -3,11 +3,13 @@ package lost42.backend.domain.member.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lost42.backend.common.Response.SuccessResponse;
-import lost42.backend.config.auth.dto.CustomUserDetails;
+import lost42.backend.common.auth.dto.CustomUserDetails;
 import lost42.backend.domain.member.dto.ChangeUserDataReq;
 import lost42.backend.domain.member.dto.ResetPasswordReq;
 import lost42.backend.domain.member.dto.UserInfoRes;
 import lost42.backend.domain.member.entity.Member;
+import lost42.backend.domain.member.exception.MemberErrorCode;
+import lost42.backend.domain.member.exception.MemberErrorException;
 import lost42.backend.domain.member.repository.MemberRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,35 +24,32 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
 
-    public SuccessResponse getUserInfo (CustomUserDetails securityUser) {
+    public UserInfoRes getUserInfo (CustomUserDetails securityUser) {
         Member member = memberRepository.findById(securityUser.getMemberId())
-                .orElseThrow(() -> new EntityNotFoundException("회원 없음"));
+                .orElseThrow(() -> new MemberErrorException(MemberErrorCode.INVALID_USER));
 
-
-        return SuccessResponse.from(UserInfoRes.fromMember(member));
+        return UserInfoRes.fromMember(member);
     }
 
-    // TODO 추후 공통 응답 핸들러로 변경
-    public SuccessResponse resetPassword(String name, String email, ResetPasswordReq req) {
-        log.warn("Reset password, user: {}, email: {}", name, email);
+    public boolean resetPassword(String name, String email, ResetPasswordReq req) {
         Member member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("유저 없음"));
+                .orElseThrow(() -> new MemberErrorException(MemberErrorCode.INVALID_USER));
 
         if (!name.equals(member.getName())) {
-            throw new IllegalArgumentException("유저가아님");
+            throw new MemberErrorException(MemberErrorCode.INVALID_USER);
         }
 
         String newPassword = passwordEncoder.encode(req.getUserPassword());
         if (!isValidPassword(req.getUserPassword())) {
-            throw new IllegalArgumentException("비밀번호 정책에 어긋남");
+            throw new MemberErrorException(MemberErrorCode.INVALID_PASSWORD);
         }
 
         member.resetPassword(newPassword);
         memberRepository.save(member);
 
-        return SuccessResponse.noContent();
+        return true;
     }
-    public SuccessResponse changeUserData(ChangeUserDataReq req, CustomUserDetails securityUser) {
+    public boolean changeUserData(ChangeUserDataReq req, CustomUserDetails securityUser) {
         Member member = memberRepository.findById(securityUser.getMemberId())
                 .orElseThrow(() -> new EntityNotFoundException("Member X"));
 
@@ -58,7 +57,7 @@ public class MemberService {
         member.changePassword(changePassword);
         memberRepository.save(member);
 
-        return SuccessResponse.noContent();
+        return true;
     }
 
     public static boolean isValidPassword(String password) {
@@ -67,4 +66,12 @@ public class MemberService {
         return Pattern.matches(regex, password);
     }
 
+    public boolean withdrawalMember(CustomUserDetails securityUser) {
+        Member member = memberRepository.findById(securityUser.getMemberId())
+                .orElseThrow(() -> new EntityNotFoundException("Member X"));
+
+        member.withdrawal();
+
+        return true;
+    }
 }

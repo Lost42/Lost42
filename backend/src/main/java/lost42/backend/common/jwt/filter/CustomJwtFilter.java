@@ -8,6 +8,7 @@ import lost42.backend.common.Response.ErrorResponse;
 import lost42.backend.common.jwt.JwtTokenUtil;
 import lost42.backend.common.jwt.dto.JwtTokenInfo;
 import lost42.backend.common.jwt.provider.TokenProvider;
+import lost42.backend.common.redis.forbidden.ForbiddenTokenService;
 import lost42.backend.common.redis.refreshtoken.RefreshTokenService;
 import lost42.backend.common.auth.dto.CustomUserDetails;
 import lost42.backend.common.auth.exception.AuthErrorCode;
@@ -37,6 +38,7 @@ public class CustomJwtFilter extends OncePerRequestFilter {
     private final JwtTokenUtil jwtTokenUtil;
     private final TokenProvider tokenProvider;
     private final RefreshTokenService refreshTokenService;
+    private final ForbiddenTokenService forbiddenTokenService;
 
     private final List<String> jwtIgnoreUrl = List.of(
             "/swagger", "/swagger-ui/**", "/v3/api-docs/**",
@@ -58,6 +60,10 @@ public class CustomJwtFilter extends OncePerRequestFilter {
         String refreshToken = jwtTokenUtil.resolveRefreshToken(request);
 
         if (accessToken != null) {
+            if (!forbiddenTokenService.isExist(refreshToken)) {
+                handleAuthErrorException(response, AuthErrorCode.INVALID_REFRESH_TOKEN);
+                return;
+            }
             CustomUserDetails securityUser = (CustomUserDetails) getUserDetails(accessToken);
             if (securityUser == null) {
                 handleAuthErrorException(response, AuthErrorCode.USER_NOT_FOUND);
@@ -71,7 +77,7 @@ public class CustomJwtFilter extends OncePerRequestFilter {
                 if (isValid && isExist) {
                     JwtTokenInfo tokenInfo = JwtTokenInfo.fromCustomUserDetails(securityUser);
                     String newAccessToken = tokenProvider.generateAccessToken(tokenInfo);
-                    response.setHeader("Authorization", "bearer " + newAccessToken);
+                    response.setHeader("Authorization", "Bearer " + newAccessToken);
                     setAuthenticationUser(securityUser, request);
                 } else if (!isValid) {
                     handleAuthErrorException(response, AuthErrorCode.USER_NOT_FOUND);

@@ -55,6 +55,11 @@ public class SecurityConfig {
                 .and()
                 .formLogin().disable()
                 .httpBasic().disable()
+                .logout()
+                .logoutUrl("/api/v1/member/logout")
+                    .invalidateHttpSession(true)
+                    .deleteCookies("JSESSIONID")
+                .and()
                 .authorizeRequests(authorize ->
                         authorize.antMatchers(ignoreUrl).permitAll()
                                 .anyRequest().authenticated()

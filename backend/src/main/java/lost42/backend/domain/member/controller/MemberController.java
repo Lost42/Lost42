@@ -7,6 +7,7 @@ import lost42.backend.common.Response.SuccessResponse;
 import lost42.backend.common.auth.dto.CustomUserDetails;
 import lost42.backend.domain.member.dto.*;
 import lost42.backend.domain.member.service.LogInService;
+import lost42.backend.domain.member.service.LogOutService;
 import lost42.backend.domain.member.service.MemberService;
 import lost42.backend.domain.member.service.SignUpService;
 import org.springframework.http.HttpHeaders;
@@ -26,15 +27,10 @@ public class MemberController {
     private final MemberService memberService;
     private final LogInService logInService;
     private final SignUpService signUpService;
+    private final LogOutService logOutService;
 
     // TODO 토큰 인증 유저 생성 후 진행할 것 : /change, /logout, /delete
     // TODO 이메일 인증 로직 이후 진행할 것 : /find-email, /find-password
-
-    @GetMapping("/test")
-    public ResponseEntity<String> test(@AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
-//        return ResponseEntity.ok().body("Hello, " + securityUser.getUserEmail());
-        return ResponseEntity.ok().body("");
-    }
 
     @GetMapping("/my")
     public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
@@ -65,7 +61,7 @@ public class MemberController {
 
     @GetMapping("/signup")
     public ResponseEntity<?> checkDuplicateEmail(@RequestParam String email) {
-        return ResponseEntity.ok().body(signUpService.checkDuplicateEmail(email));
+        return ResponseEntity.ok().body(SuccessResponse.from(signUpService.checkDuplicateEmail(email)));
     }
 
     @PostMapping("/find-email")
@@ -80,22 +76,23 @@ public class MemberController {
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestParam("name") String name, @RequestParam("email") String email, @RequestBody ResetPasswordReq req) {
-        return ResponseEntity.ok().body(memberService.resetPassword(name, email, req));
+        return ResponseEntity.ok().body(SuccessResponse.from(memberService.resetPassword(name, email, req)));
     }
 
     @PatchMapping("/change")
     public ResponseEntity<?> changeUserData(@RequestBody ChangeUserDataReq req, @AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
-        return ResponseEntity.ok().body(memberService.changeUserData(req, securityUser));
+        return ResponseEntity.ok().body(SuccessResponse.from(memberService.changeUserData(req, securityUser)));
     }
 
     @GetMapping("/logout")
-    public ResponseEntity<?> logout() {
-        return ResponseEntity.ok().body("");
+    public ResponseEntity<?> logout(@AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
+        logOutService.logOut(securityUser);
+        return ResponseEntity.ok().body(SuccessResponse.noContent());
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteUser(@AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
-        return ResponseEntity.ok().body("");
+        return ResponseEntity.ok().body(SuccessResponse.from(memberService.withdrawalMember(securityUser)));
     }
 
 }
