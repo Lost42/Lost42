@@ -38,7 +38,8 @@ public class SecurityConfig {
             "/api/v1/members/signup",
             "/api/v1/members/find-email", "/api/v1/members/find-password",
             "/api/v1/members/reset-password", "/api/v1/members/signin",
-            "/api/v1/jwt/test"
+            "/api/v1/jwt/test",
+            "/api/v1/members/find-email", "api/v1/members/find-password"
     };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {

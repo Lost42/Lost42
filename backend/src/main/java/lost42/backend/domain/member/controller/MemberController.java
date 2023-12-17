@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lost42.backend.common.Response.SuccessResponse;
 import lost42.backend.common.auth.dto.CustomUserDetails;
+import lost42.backend.common.mail.EmailMessage;
+import lost42.backend.common.mail.EmailService;
 import lost42.backend.domain.member.dto.*;
 import lost42.backend.domain.member.service.LogInService;
 import lost42.backend.domain.member.service.LogOutService;
@@ -16,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import javax.validation.Valid;
 
 
@@ -28,6 +31,7 @@ public class MemberController {
     private final LogInService logInService;
     private final SignUpService signUpService;
     private final LogOutService logOutService;
+    private final EmailService emailService;
 
     // TODO 토큰 인증 유저 생성 후 진행할 것 : /change, /logout, /delete
     // TODO 이메일 인증 로직 이후 진행할 것 : /find-email, /find-password
@@ -71,7 +75,8 @@ public class MemberController {
 
     @PostMapping("/find-password")
     public ResponseEntity<?> findPassword(@RequestBody FindPasswordReq req) {
-        return ResponseEntity.ok().body("");
+        emailService.sendMail(req);
+        return ResponseEntity.ok().body(SuccessResponse.noContent());
     }
 
     @PostMapping("/reset-password")

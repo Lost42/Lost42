@@ -40,6 +40,18 @@ spring:
     redis:
       host: localhost
       port: 6379
+  mail:
+    host: smtp.gmail.com # SMTP 서버 호스트
+    port: 587 # SMTP 서버 포트
+    username: ${MAIL_SENDER} # 발신자(@ 앞의 아이디 부분만)
+    password: ${MAIL_APP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true # 사용자 인증 시도 여부(기본값: false)
+          timeout: 5000 # Socket Read Timeout(ms) (기본값: 무한대)
+          starttls:
+            enable: true # StartTLS 활성화 여부 (기본값: false)
 
   main:
     allow-bean-definition-overriding: true
