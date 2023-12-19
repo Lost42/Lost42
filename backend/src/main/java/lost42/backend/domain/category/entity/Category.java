@@ -1,6 +1,7 @@
 package lost42.backend.domain.category.entity;
 
 import lombok.*;
+import lost42.backend.config.Auditable;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Category {
+public class Category extends Auditable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
