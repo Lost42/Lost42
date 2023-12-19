@@ -41,10 +41,11 @@ public class CustomJwtFilter extends OncePerRequestFilter {
     private final ForbiddenTokenService forbiddenTokenService;
 
     private final List<String> jwtIgnoreUrl = List.of(
+            "/", "/favicon.ico",
             "/swagger", "/swagger-ui/**", "/v3/api-docs/**",
             "/api/v1/members/signin", "/oauth2/**", "/api/v1/members/signup",
             "/api/v1/jwt/test",
-            "/api/v1/members/find-email", "/api/v1/members/find-password"
+            "/api/v1/members/find-email", "/api/v1/members/find-password", "/api/v1/members/auth"
     );
 
 

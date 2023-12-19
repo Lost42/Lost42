@@ -36,10 +36,9 @@ public class SecurityConfig {
             "/oauth2/**", "/login/oauth2/**",
             "/swagger", "/swagger-ui/**", "/v3/api-docs/**",
             "/api/v1/members/signup",
-            "/api/v1/members/find-email", "/api/v1/members/find-password",
             "/api/v1/members/reset-password", "/api/v1/members/signin",
             "/api/v1/jwt/test",
-            "/api/v1/members/find-email", "api/v1/members/find-password"
+            "/api/v1/members/find-email", "/api/v1/members/find-password", "/api/v1/members/auth"
     };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {

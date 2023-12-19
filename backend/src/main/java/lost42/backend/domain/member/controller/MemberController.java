@@ -7,6 +7,7 @@ import lost42.backend.common.Response.SuccessResponse;
 import lost42.backend.common.auth.dto.CustomUserDetails;
 import lost42.backend.common.mail.EmailMessage;
 import lost42.backend.common.mail.EmailService;
+import lost42.backend.common.redis.authToken.AuthTokenService;
 import lost42.backend.domain.member.dto.*;
 import lost42.backend.domain.member.service.LogInService;
 import lost42.backend.domain.member.service.LogOutService;
@@ -32,9 +33,7 @@ public class MemberController {
     private final SignUpService signUpService;
     private final LogOutService logOutService;
     private final EmailService emailService;
-
-    // TODO 토큰 인증 유저 생성 후 진행할 것 : /change, /logout, /delete
-    // TODO 이메일 인증 로직 이후 진행할 것 : /find-email, /find-password
+    private final AuthTokenService authTokenService;
 
     @GetMapping("/my")
     public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
@@ -68,15 +67,23 @@ public class MemberController {
         return ResponseEntity.ok().body(SuccessResponse.from(signUpService.checkDuplicateEmail(email)));
     }
 
-    @PostMapping("/find-email")
-    public ResponseEntity<?> findEmail(@RequestBody FindEmailReq req) {
-        return ResponseEntity.ok().body("");
+    @GetMapping("/auth")
+    public ResponseEntity<?> authCheck(@RequestParam("id") Long memberId, @RequestParam("token") String token) {
+        authTokenService.validate(memberId, token);
+
+        return ResponseEntity.ok().body("인증 완료");
     }
 
+    // TODO Url 방식으로 변경
     @PostMapping("/find-password")
     public ResponseEntity<?> findPassword(@RequestBody FindPasswordReq req) {
         emailService.sendMail(req);
         return ResponseEntity.ok().body(SuccessResponse.noContent());
+    }
+
+    @GetMapping("")
+    public ResponseEntity<?> endPoint() {
+        return ResponseEntity.ok().body("");
     }
 
     @PostMapping("/reset-password")
