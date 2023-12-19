@@ -59,7 +59,7 @@ public class MemberController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@Valid @RequestBody SignUpReq req) {
-        return ResponseEntity.ok().body(signUpService.SignUp(req));
+        return ResponseEntity.ok().body(SuccessResponse.from(signUpService.SignUp(req)));
     }
 
     @GetMapping("/signup")
