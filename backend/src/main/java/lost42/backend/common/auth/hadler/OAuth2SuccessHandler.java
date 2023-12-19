@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import lost42.backend.common.jwt.dto.JwtTokenInfo;
 import lost42.backend.common.jwt.provider.TokenProvider;
 import lost42.backend.common.auth.dto.CustomOAuth2User;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -27,21 +29,16 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         JwtTokenInfo tokenInfo = JwtTokenInfo.fromOAuth2User(oAuth2User);
         String accessToken = tokenProvider.generateAccessToken(tokenInfo);
+        String refreshToken = tokenProvider.generateRefreshToken(tokenInfo);
 
-        log.warn("AccessToken: {}", accessToken);
-
-        // TODO Refresh 토큰 발급 이후 쿠키에 담는 과정 추가해야함
         response.addHeader("Authorization", "Bearer " + accessToken);
-        response.sendRedirect("http://localhost:3000");
-    }
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("http://localhost:3000")
+                .build();
 
-    public void setRefreshTokenToCookie(HttpServletRequest request ,OAuth2User oAuth2User) {
-//        String refreshToken = tokenProvider.generateRefreshToken(oAuth2User.getAttribute("email"));
-//        Cookie cookie = new Cookie("refresh_token", refreshToken);
-//        cookie.setHttpOnly(true);
-//        cookie.setSecure(request.isSecure());
-//        cookie.setPath("http://localhost:3000");
-//
-//        return cookie;
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        response.sendRedirect("http://localhost:3000");
     }
 }
