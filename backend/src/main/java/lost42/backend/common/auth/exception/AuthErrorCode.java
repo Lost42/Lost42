@@ -29,6 +29,7 @@ public enum AuthErrorCode implements StatusCode {
     WRONG_JWT_TOKEN(UNAUTHORIZED, "잘못된 토큰입니다(default)"),
     UNSUPPORTED_JWT_TOKEN(UNAUTHORIZED, "지원하지 않는 토큰입니다"),
     USER_NOT_FOUND(UNAUTHORIZED, "존재하지 않는 유저입니다"),
+    NEED_LOGIN(UNAUTHORIZED, "로그인을 해야 합니다."),
 
     /**
      * 403 FORBIDDEN

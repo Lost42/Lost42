@@ -13,6 +13,7 @@ import javax.validation.constraints.NotBlank;
 @Schema(description = "유저 데이터 변경 요청 DTO")
 public class ChangeUserDataReq {
     @NotBlank
+    @Schema(description = "변경 될 비밀번호")
     private String userPassword;
 
     private String userContract;

@@ -2,7 +2,6 @@ package lost42.backend.domain.member.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lost42.backend.common.Response.SuccessResponse;
 import lost42.backend.common.auth.dto.CustomUserDetails;
 import lost42.backend.domain.member.dto.ChangeUserDataReq;
 import lost42.backend.domain.member.dto.ResetPasswordReq;
@@ -50,6 +49,10 @@ public class MemberService {
         return true;
     }
     public boolean changeUserData(ChangeUserDataReq req, CustomUserDetails securityUser) {
+        if (!isValidPassword(req.getUserPassword())) {
+            throw new MemberErrorException(MemberErrorCode.INVALID_PASSWORD);
+        }
+
         Member member = memberRepository.findById(securityUser.getMemberId())
                 .orElseThrow(() -> new EntityNotFoundException("Member X"));
 

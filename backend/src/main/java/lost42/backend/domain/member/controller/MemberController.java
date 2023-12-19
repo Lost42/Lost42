@@ -74,16 +74,10 @@ public class MemberController {
         return ResponseEntity.ok().body("인증 완료");
     }
 
-    // TODO Url 방식으로 변경
     @PostMapping("/find-password")
     public ResponseEntity<?> findPassword(@RequestBody FindPasswordReq req) {
         emailService.sendMail(req);
         return ResponseEntity.ok().body(SuccessResponse.noContent());
-    }
-
-    @GetMapping("")
-    public ResponseEntity<?> endPoint() {
-        return ResponseEntity.ok().body("");
     }
 
     @PostMapping("/reset-password")

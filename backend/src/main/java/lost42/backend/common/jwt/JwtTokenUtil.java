@@ -58,7 +58,7 @@ public class JwtTokenUtil {
     // 토큰의 유효성 검사
     public boolean validateAccessToken(String accessToken, CustomUserDetails userDetails) {
         final Long memberId = extractMemberIdWithAccessToken(accessToken);
-        return (memberId == userDetails.getMemberId() && !isTokenExpiredWithAccessToken(accessToken));
+        return (memberId == userDetails.getMemberId());
     }
 
     public Date extractExpirationWithAccessToken(String accessToken) {
@@ -66,7 +66,7 @@ public class JwtTokenUtil {
     }
 
     // 토큰이 만료되었는지 확인
-    private Boolean isTokenExpiredWithAccessToken(String accessToken) {
+    public Boolean isTokenExpiredWithAccessToken(String accessToken) {
         final Date expiration = extractExpirationWithAccessToken(accessToken);
         return expiration.before(new Date());
     }
@@ -86,8 +86,7 @@ public class JwtTokenUtil {
     // 토큰의 유효성 검사
     public Boolean validateRefreshToken(String refreshToken, CustomUserDetails userDetails) {
         final Long memberId = extractMemberIdWithRefreshToken(refreshToken);
-        log.warn("memberId: {}, userDetail memberId: {}", memberId, userDetails.getMemberId());
-        return (memberId == userDetails.getMemberId() && !isTokenExpiredWithRefreshToken(refreshToken));
+        return (memberId == userDetails.getMemberId());
     }
 
     public Date extractExpirationWithRefreshToken(String refreshToken) {
@@ -95,7 +94,7 @@ public class JwtTokenUtil {
     }
 
     // 토큰이 만료되었는지 확인
-    private Boolean isTokenExpiredWithRefreshToken(String refreshToken) {
+    public Boolean isTokenExpiredWithRefreshToken(String refreshToken) {
         final Date expiration = extractExpirationWithRefreshToken(refreshToken);
         return expiration.before(new Date());
     }

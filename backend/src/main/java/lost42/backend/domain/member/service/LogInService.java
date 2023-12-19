@@ -7,7 +7,6 @@ import lost42.backend.common.jwt.provider.TokenProvider;
 import lost42.backend.common.redis.refreshtoken.RefreshTokenService;
 import lost42.backend.common.auth.dto.CustomUserDetails;
 import lost42.backend.domain.member.dto.LoginReq;
-import lost42.backend.domain.member.repository.MemberRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class LogInService {
     private final TokenProvider tokenProvider;
-    private final MemberRepository memberRepository;
     private final AuthenticationManager authenticationManager;
     private final RefreshTokenService refreshTokenService;
 

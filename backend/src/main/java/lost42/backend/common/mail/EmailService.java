@@ -25,7 +25,7 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final AuthTokenRepository authTokenRepository;
 
-    public void sendMail(FindPasswordReq req) {
+    public void sendMail(FindPasswordReq req)  {
         Member member = memberRepository.findByEmail(req.getUserEmail())
                 .orElseThrow(() -> new MemberErrorException(MemberErrorCode.INVALID_USER));
 

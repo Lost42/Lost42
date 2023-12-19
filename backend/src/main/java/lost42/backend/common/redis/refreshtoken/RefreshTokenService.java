@@ -16,11 +16,11 @@ import java.time.Duration;
 public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final TokenProvider tokenProvider;
-    private final Duration refreshTokenExpiration;
+    private final long refreshTokenExpiration;
 
     public RefreshTokenService(RefreshTokenRepository refreshTokenRepository,
                                TokenProvider tokenProvider,
-                               @Value("${jwt.token.refresh-expiration}") Duration refreshTokenExpiration)
+                               @Value("${jwt.token.refresh-expiration}") long refreshTokenExpiration)
     {
         this.refreshTokenRepository = refreshTokenRepository;
         this.tokenProvider = tokenProvider;
@@ -31,6 +31,7 @@ public class RefreshTokenService {
         RefreshToken save = RefreshToken.builder()
                 .memberId(tokenProvider.getIdWithRefreshToken(refreshToken))
                 .token(refreshToken)
+                .ttl(refreshTokenExpiration)
                 .build();
 
         refreshTokenRepository.save(save);
@@ -45,7 +46,7 @@ public class RefreshTokenService {
 //        return "";
 //    }
 
-    public boolean isValidRefreshToken(String refreshToken) {
+    public boolean isExistRefreshToken(String refreshToken) {
         RefreshToken saved = refreshTokenRepository.findById(tokenProvider.getIdWithRefreshToken(refreshToken))
                 .orElse(null);
 
@@ -54,15 +55,6 @@ public class RefreshTokenService {
             return false;
         }
 
-        if (isRefreshTokenExpired(saved)) {
-            log.warn("Refresh token has expired");
-            return false;
-        }
-
         return true;
-    }
-
-    private boolean isRefreshTokenExpired(RefreshToken refreshToken) {
-        return refreshToken.getTtl() <= System.currentTimeMillis();
     }
 }

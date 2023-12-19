@@ -1,6 +1,5 @@
 package lost42.backend.common.jwt.filter;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +11,6 @@ import lost42.backend.common.redis.forbidden.ForbiddenTokenService;
 import lost42.backend.common.redis.refreshtoken.RefreshTokenService;
 import lost42.backend.common.auth.dto.CustomUserDetails;
 import lost42.backend.common.auth.exception.AuthErrorCode;
-import lost42.backend.common.auth.exception.AuthErrorException;
 import lost42.backend.common.auth.service.CustomUserDetailsService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -61,38 +59,57 @@ public class CustomJwtFilter extends OncePerRequestFilter {
         String accessToken = jwtTokenUtil.resolveAccessToken(request);
         String refreshToken = jwtTokenUtil.resolveRefreshToken(request);
 
-        if (accessToken != null) {
-            if (!forbiddenTokenService.isExist(refreshToken)) {
-                handleAuthErrorException(response, AuthErrorCode.INVALID_REFRESH_TOKEN);
-                return;
-            }
-            CustomUserDetails securityUser = (CustomUserDetails) getUserDetails(accessToken);
-            if (securityUser == null) {
-                handleAuthErrorException(response, AuthErrorCode.USER_NOT_FOUND);
-                return;
-            }
-            if (jwtTokenUtil.validateAccessToken(accessToken, securityUser)) {
-                setAuthenticationUser(securityUser, request);
-            } else {
-                boolean isValid = jwtTokenUtil.validateRefreshToken(refreshToken, securityUser);
-                boolean isExist = refreshTokenService.isValidRefreshToken(refreshToken);
-                if (isValid && isExist) {
-                    JwtTokenInfo tokenInfo = JwtTokenInfo.fromCustomUserDetails(securityUser);
-                    String newAccessToken = tokenProvider.generateAccessToken(tokenInfo);
-                    response.setHeader("Authorization", "Bearer " + newAccessToken);
-                    setAuthenticationUser(securityUser, request);
-                } else if (!isValid) {
-                    handleAuthErrorException(response, AuthErrorCode.USER_NOT_FOUND);
-                    return;
-                } else if (!isExist) {
-                    handleAuthErrorException(response, AuthErrorCode.INVALID_REFRESH_TOKEN);
-                    return;
-                }
-            }
-        } else {
+        // accessToken, refreshToken 시나리오
+        // 1. accessToken 유효, refreshToken 유효 -> 그대로 로직 진행
+        // 2. accessToken 유효, refreshToken 만료 -> 새로운 refreshToken 발급한 후에 로직 그대로 진행
+        // 3. accessToken 만료, refreshToken 유효 -> 새로운 accessToken 발급
+        // 4. accessToken 만료, refreshToken 만료 -> 재 로그인 필요
+
+        // 액세스 토큰이나 refreshToken이 존재하지 않는 다면
+        if (accessToken == null) {
             handleAuthErrorException(response, AuthErrorCode.EMPTY_ACCESS_TOKEN);
             return;
+        } else if (refreshToken == null) {
+            handleAuthErrorException(response, AuthErrorCode.EMPTY_REFRESH_TOKEN);
+            return;
         }
+
+        // 사용이 금지된 refreshToken 이거나 존재하지 않는 refreshToken 일 경우
+        if (forbiddenTokenService.isExist(refreshToken) || !refreshTokenService.isExistRefreshToken(refreshToken)) {
+            handleAuthErrorException(response, AuthErrorCode.INVALID_REFRESH_TOKEN);
+            return;
+        }
+
+        // 존재하지 않는 user 라면 (accessToken 조작)
+        CustomUserDetails securityUser = (CustomUserDetails) getUserDetails(accessToken);
+        if (securityUser == null) {
+            handleAuthErrorException(response, AuthErrorCode.FAILED_AUTHENTICATION);
+            return;
+        }
+
+        // 정상적인 토큰인가 (멤버 id비교)?
+        boolean validAccess = jwtTokenUtil.validateAccessToken(accessToken, securityUser);
+        boolean validRefresh = jwtTokenUtil.validateRefreshToken(refreshToken, securityUser);
+        if (!validAccess || !validRefresh) {
+            handleAuthErrorException(response, AuthErrorCode.FAILED_AUTHENTICATION);
+            return;
+        }
+
+        // 만료된 토큰인가?
+        boolean isExpireAccess = jwtTokenUtil.isTokenExpiredWithAccessToken(accessToken);
+        boolean isExpireRefresh = jwtTokenUtil.isTokenExpiredWithRefreshToken(refreshToken);
+        if (isExpireAccess) {
+            if (!isExpireRefresh) {
+                String newAccessToken = tokenProvider.generateAccessToken(JwtTokenInfo.fromCustomUserDetails(securityUser));
+
+                response.setHeader("Authorization", "Bearer " + newAccessToken);
+            } else {
+                handleAuthErrorException(response, AuthErrorCode.NEED_LOGIN);
+                return;
+            }
+        }
+
+        setAuthenticationUser(securityUser, request);
 
         filterChain.doFilter(request, response);
     }

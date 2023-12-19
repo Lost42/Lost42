@@ -7,6 +7,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
 
+import java.time.Duration;
+
 @RedisHash("refreshToken")
 @Getter
 @ToString(of = {"memberId", "token"})
