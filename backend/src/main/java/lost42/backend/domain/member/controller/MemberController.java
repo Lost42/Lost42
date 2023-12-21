@@ -3,6 +3,7 @@ package lost42.backend.domain.member.controller;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lost42.backend.common.Response.FailureResponse;
 import lost42.backend.common.Response.SuccessResponse;
 import lost42.backend.common.auth.dto.CustomUserDetails;
 import lost42.backend.common.mail.EmailMessage;
@@ -64,14 +65,17 @@ public class MemberController {
 
     @GetMapping("/signup")
     public ResponseEntity<?> checkDuplicateEmail(@RequestParam String email) {
-        return ResponseEntity.ok().body(SuccessResponse.from(signUpService.checkDuplicateEmail(email)));
+        boolean result = signUpService.checkDuplicateEmail(email);
+        Object response = result ? SuccessResponse.from("사용 가능한 이메일 입니다.") : FailureResponse.from("중복된 이메일입니다.");
+
+        return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("/auth")
     public ResponseEntity<?> authCheck(@RequestParam("id") Long memberId, @RequestParam("token") String token) {
         authTokenService.validate(memberId, token);
 
-        return ResponseEntity.ok().body("인증 완료");
+        return ResponseEntity.ok().body(SuccessResponse.noContent());
     }
 
     @PostMapping("/find-password")

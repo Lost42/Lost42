@@ -50,13 +50,13 @@ public class SecurityConfig {
                     .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                     .accessDeniedHandler(jwtAccessDeniedHandler)
                 .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .formLogin().disable()
                 .httpBasic().disable()
                 .logout()
-                .logoutUrl("/api/v1/member/logout")
+                    .logoutUrl("/api/v1/member/logout")
                     .invalidateHttpSession(true)
                     .deleteCookies("JSESSIONID")
                 .and()
@@ -97,3 +97,4 @@ public class SecurityConfig {
     }
 
 }
+

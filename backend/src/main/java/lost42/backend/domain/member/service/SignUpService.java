@@ -27,6 +27,10 @@ public class SignUpService {
      * 패스워드 정책 : 8~12자/ 알파벳 + 숫자 + 특수기호 최소 1개
      */
     public SignUpRes SignUp(SignUpReq req) {
+        if (!checkDuplicateEmail(req.getUserEmail())) {
+            throw new MemberErrorException(MemberErrorCode.ALREADY_EXIST_USER);
+        }
+
         if (!isValidPassword(req.getUserPassword())) {
             throw new MemberErrorException(MemberErrorCode.INVALID_PASSWORD);
         }
@@ -47,13 +51,13 @@ public class SignUpService {
         return SignUpRes.from(newMember);
     }
 
-    public Object checkDuplicateEmail(String email) {
+    public boolean checkDuplicateEmail(String email) {
         Member member = memberRepository.findByEmail(email).orElse(null);
         if (member != null) {
-            return FailureResponse.from("중복된 이메일입니다");
+            return false;
         }
 
-        return SuccessResponse.from("사용 가능한 이메일입니다");
+        return true;
     }
 
     /**
