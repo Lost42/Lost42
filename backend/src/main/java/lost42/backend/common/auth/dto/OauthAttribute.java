@@ -2,7 +2,7 @@ package lost42.backend.common.auth.dto;
 
 import lombok.Builder;
 import lombok.Getter;
-import lost42.backend.common.auth.MemberRole;
+import lost42.backend.domain.member.entity.MemberRole;
 import lost42.backend.domain.member.entity.Member;
 
 import java.util.Map;

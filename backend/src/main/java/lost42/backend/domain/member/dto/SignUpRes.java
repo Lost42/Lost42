@@ -4,7 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lost42.backend.common.auth.MemberRole;
+import lost42.backend.domain.member.entity.MemberRole;
 import lost42.backend.domain.member.entity.Member;
 
 @Builder

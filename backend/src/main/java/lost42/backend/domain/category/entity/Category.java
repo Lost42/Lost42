@@ -2,9 +2,12 @@ package lost42.backend.domain.category.entity;
 
 import lombok.*;
 import lost42.backend.config.Auditable;
+import lost42.backend.domain.board.entity.Board;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -17,6 +20,11 @@ public class Category extends Auditable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "category_id")
     private Long categoryId;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "category")
+    private List<BoardCategory> boardCategories = new ArrayList<>();
+
 
     @Column(name = "name", length = 50, nullable = false)
     private String name;
