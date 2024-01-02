@@ -59,10 +59,12 @@ public class Board extends Auditable {
     private String managedNumber;
 
     @Column(name = "status")
-    private String status; // 추후 enum 으로 변경
+    @Convert(converter = BoardStatusConverter.class)
+    private BoardStatus status;
 
     @Column(name = "type")
-    private String type; // 추후 enum 으로 변경
+    @Convert(converter = BoardTypeConverter.class)
+    private BoardType type;
 
     @Column(name = "deleted_dt")
     private LocalDateTime deletedDt;
@@ -79,7 +81,7 @@ public class Board extends Auditable {
     }
 
     public Board changeType(ChangeTypeReq req) {
-        this.type = req.getBoardType();
+        this.type = BoardType.fromString(req.getBoardType());
         return this;
     }
 
