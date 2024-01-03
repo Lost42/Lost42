@@ -40,9 +40,6 @@ public class Member extends Auditable {
     @Column(name = "oauth_provider", length = 20)
     private String oauthProvider;
 
-    @Column(name = "refresh_token", length = 100)
-    private String refreshToken;
-
     @Column(name = "role", nullable = false)
     private MemberRole role;
 

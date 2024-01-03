@@ -3,7 +3,7 @@ package lost42.backend.domain.board.controller;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lost42.backend.common.Response.SuccessResponse;
+import lost42.backend.common.response.SuccessResponse;
 import lost42.backend.common.auth.dto.CustomUserDetails;
 import lost42.backend.domain.board.dto.ChangeTypeReq;
 import lost42.backend.domain.board.dto.CreateContentReq;
@@ -15,7 +15,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
@@ -25,10 +24,10 @@ public class BoardController {
     private final BoardService boardService;
 
     // 게시글 조회
-//    @PostMapping("")
-//    public ResponseEntity<?> getBoards(@Valid @RequestBody GetBoardReq req) {
-//        return ResponseEntity.ok().body(boardService.getBoards(req));
-//    }
+    @PostMapping("")
+    public ResponseEntity<?> getBoards(@Valid @RequestBody GetBoardReq req) {
+        return ResponseEntity.ok().body(SuccessResponse.from(boardService.getBoards(req)));
+    }
 
     // 상세 글 조회
     @GetMapping("/getUser")

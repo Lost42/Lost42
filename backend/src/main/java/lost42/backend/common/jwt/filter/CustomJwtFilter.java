@@ -3,7 +3,7 @@ package lost42.backend.common.jwt.filter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lost42.backend.common.Response.ErrorResponse;
+import lost42.backend.common.response.ErrorResponse;
 import lost42.backend.common.jwt.JwtTokenUtil;
 import lost42.backend.common.jwt.dto.JwtTokenInfo;
 import lost42.backend.common.jwt.provider.TokenProvider;

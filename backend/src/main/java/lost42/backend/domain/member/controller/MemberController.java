@@ -3,10 +3,9 @@ package lost42.backend.domain.member.controller;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lost42.backend.common.Response.FailureResponse;
-import lost42.backend.common.Response.SuccessResponse;
+import lost42.backend.common.response.FailureResponse;
+import lost42.backend.common.response.SuccessResponse;
 import lost42.backend.common.auth.dto.CustomUserDetails;
-import lost42.backend.common.mail.EmailMessage;
 import lost42.backend.common.mail.EmailService;
 import lost42.backend.common.redis.authToken.AuthTokenService;
 import lost42.backend.domain.member.dto.*;
@@ -20,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import javax.mail.MessagingException;
 import javax.validation.Valid;
 
 

@@ -2,6 +2,10 @@ package lost42.backend.domain.board.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lost42.backend.domain.board.entity.BoardStatus;
+import lost42.backend.domain.board.entity.BoardType;
+import lost42.backend.domain.board.exception.BoardErrorCode;
+import lost42.backend.domain.board.exception.BoardErrorException;
 import lost42.backend.domain.member.entity.MemberRole;
 import lost42.backend.common.auth.dto.CustomUserDetails;
 import lost42.backend.domain.board.dto.*;
@@ -13,6 +17,9 @@ import lost42.backend.domain.member.exception.MemberErrorException;
 import lost42.backend.domain.member.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -21,19 +28,30 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
 
-//    public Object getBoards(GetBoardReq req) {
-//
-//    }
+    public List<GetBoardRes> getBoards(GetBoardReq req) {
+        List<Board> boards = boardRepository.findAllContents(req);
+        if (boards == null) {
+            return null;
+        }
+
+        List<GetBoardRes> response = new ArrayList<>();
+
+        for (Board board : boards) {
+            response.add(GetBoardRes.fromContent(board));
+        }
+
+        return response;
+    }
 
     public GetContentRes getContent(Long boardId, CustomUserDetails securityUser) {
-        Board content = boardRepository.findById(boardId).orElse(null);
+        Board content = isExist(boardId);
 
         Boolean isWriter = content.getMember().getMemberId() == securityUser.getMemberId();
         return GetContentRes.fromContentAndWriter(content, isWriter);
     }
 
     public GetContentRes getGuestContent(Long boardId) {
-        Board content = boardRepository.findById(boardId).orElse(null);
+        Board content = isExist(boardId);
 
         return GetContentRes.fromContent(content);
     }
@@ -50,9 +68,9 @@ public class BoardService {
                 .foundDate(req.getBoardFoundDate())
                 .keepingAt(req.getBoardKeepingAt())
                 .description(req.getBoardDescription())
-                .managedNumber("123123") // 추후 enum 클래스로 변경
-                .status("보관 중") // 추후 enum 클래스로 변경 변경
-                .type(req.getBoardType())
+                .managedNumber("123123")
+                .status(BoardStatus.ING)
+                .type(BoardType.FIND)
                 .build();
 
         boardRepository.save(newContent);
@@ -61,7 +79,7 @@ public class BoardService {
     }
 
     public UpdateContentRes updateContent(UpdateContentReq req, CustomUserDetails securityUser) {
-        Board content = boardRepository.findById(req.getBoardId()).orElse(null);
+        Board content = isExist(req.getBoardId());
         Member member = memberRepository.findById(securityUser.getMemberId())
                 .orElseThrow(() -> new MemberErrorException(MemberErrorCode.INVALID_USER));
 
@@ -77,7 +95,7 @@ public class BoardService {
     }
 
     public UpdateContentRes changeType(ChangeTypeReq req, CustomUserDetails securityUser) {
-        Board content = boardRepository.findById(req.getBoardId()).orElse(null);
+        Board content = isExist(req.getBoardId());
         Member member = memberRepository.findById(securityUser.getMemberId())
                 .orElseThrow(() -> new MemberErrorException(MemberErrorCode.INVALID_USER));
 
@@ -93,7 +111,7 @@ public class BoardService {
     }
 
     public Boolean deleteContent(Long boardId, CustomUserDetails securityUser) {
-        Board content = boardRepository.findById(boardId).orElse(null);
+        Board content = isExist(boardId);
         Member member = memberRepository.findById(securityUser.getMemberId())
                 .orElseThrow(() -> new MemberErrorException(MemberErrorCode.INVALID_USER));
 
@@ -106,6 +124,11 @@ public class BoardService {
         boardRepository.save(content);
 
         return true;
+    }
+
+    public Board isExist(Long boardId) {
+        return boardRepository.findById(boardId)
+                .orElseThrow(() -> new BoardErrorException(BoardErrorCode.INVALID_CONTENT));
     }
 
 }
