@@ -1,6 +1,7 @@
-package lost42.backend.domain.board.entity;
+package lost42.backend.domain.board.converter;
 
 import lombok.Getter;
+import lost42.backend.domain.board.entity.BoardType;
 
 import javax.persistence.AttributeConverter;
 

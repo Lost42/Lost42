@@ -6,21 +6,21 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum MemberRole {
-    MEMBER("ROLE_MEMBER", "일반 유저"),
-    ADMIN("ROLE_ADMIN", "관리자");
+    ADMIN("1", "ROLE_ADMIN"),
+    MEMBER("2", "ROLE_MEMBER");
 
-    private final String key;
-    private final String title;
+    private final String code;
+    private final String role;
 
     @Override
     public String toString() {
-        return String.format("role: %s", this.key);
+        return String.format("role: %s", this.role);
     }
 
     public static MemberRole fromString(String key) {
         String roleKey = "ROLE_" + key;
         for (MemberRole role : MemberRole.values()) {
-            if (role.getKey().equals(roleKey)) {
+            if (role.getRole().equals(roleKey)) {
                 return role;
             }
         }

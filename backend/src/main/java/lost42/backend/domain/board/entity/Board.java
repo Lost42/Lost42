@@ -2,10 +2,11 @@ package lost42.backend.domain.board.entity;
 
 import lombok.*;
 import lost42.backend.config.Auditable;
+import lost42.backend.domain.board.converter.BoardStatusConverter;
+import lost42.backend.domain.board.converter.BoardTypeConverter;
 import lost42.backend.domain.board.dto.ChangeTypeReq;
 import lost42.backend.domain.board.dto.UpdateContentReq;
 import lost42.backend.domain.category.entity.BoardCategory;
-import lost42.backend.domain.category.entity.Category;
 import lost42.backend.domain.member.entity.Member;
 
 import javax.persistence.*;

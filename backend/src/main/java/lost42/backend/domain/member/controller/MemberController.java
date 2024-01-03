@@ -3,6 +3,7 @@ package lost42.backend.domain.member.controller;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lost42.backend.common.jwt.JwtTokenValidation;
 import lost42.backend.common.response.FailureResponse;
 import lost42.backend.common.response.SuccessResponse;
 import lost42.backend.common.auth.dto.CustomUserDetails;
@@ -16,6 +17,7 @@ import lost42.backend.domain.member.service.SignUpService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +36,8 @@ public class MemberController {
     private final EmailService emailService;
     private final AuthTokenService authTokenService;
 
+    @JwtTokenValidation // 필요할까??? -> token이 없다면 객체 자체가 생성되지 않아 Authentication 객체가 null 인데... 차라리 PreAuthorize를 제외하자
+//    @PreAuthorize("isAuthenticated()")
     @GetMapping("/my")
     public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
         return ResponseEntity.ok().body(SuccessResponse.from(memberService.getUserInfo(securityUser)));
@@ -69,6 +73,7 @@ public class MemberController {
         return ResponseEntity.ok().body(response);
     }
 
+    @JwtTokenValidation
     @GetMapping("/auth")
     public ResponseEntity<?> authCheck(@RequestParam("id") Long memberId, @RequestParam("token") String token) {
         authTokenService.validate(memberId, token);
@@ -87,17 +92,20 @@ public class MemberController {
         return ResponseEntity.ok().body(SuccessResponse.from(memberService.resetPassword(name, email, req)));
     }
 
+    @JwtTokenValidation
     @PatchMapping("/change")
     public ResponseEntity<?> changeUserData(@RequestBody ChangeUserDataReq req, @AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
         return ResponseEntity.ok().body(SuccessResponse.from(memberService.changeUserData(req, securityUser)));
     }
 
+    @JwtTokenValidation
     @GetMapping("/logout")
     public ResponseEntity<?> logout(@AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
         logOutService.logOut(securityUser);
         return ResponseEntity.ok().body(SuccessResponse.noContent());
     }
 
+    @JwtTokenValidation
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteUser(@AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
         return ResponseEntity.ok().body(SuccessResponse.from(memberService.withdrawalMember(securityUser)));

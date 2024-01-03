@@ -31,12 +31,14 @@ public class BoardService {
     public List<GetBoardRes> getBoards(GetBoardReq req) {
         List<Board> boards = boardRepository.findAllContents(req);
         if (boards == null) {
-            return null;
+            throw new BoardErrorException(BoardErrorCode.INVALID_CONTENT);
         }
 
         List<GetBoardRes> response = new ArrayList<>();
 
         for (Board board : boards) {
+            if (board.getDeletedDt() != null)
+                continue;
             response.add(GetBoardRes.fromContent(board));
         }
 
@@ -46,7 +48,7 @@ public class BoardService {
     public GetContentRes getContent(Long boardId, CustomUserDetails securityUser) {
         Board content = isExist(boardId);
 
-        Boolean isWriter = content.getMember().getMemberId() == securityUser.getMemberId();
+        Boolean isWriter = content.getMember().getMemberId().equals(securityUser.getMemberId());
         return GetContentRes.fromContentAndWriter(content, isWriter);
     }
 
@@ -83,8 +85,8 @@ public class BoardService {
         Member member = memberRepository.findById(securityUser.getMemberId())
                 .orElseThrow(() -> new MemberErrorException(MemberErrorCode.INVALID_USER));
 
-        if (!member.getRole().equals(MemberRole.ADMIN) && content.getMember().getMemberId() != member.getMemberId()) {
-            throw new RuntimeException("수정 권한 없음");
+        if (!member.getRole().equals(MemberRole.ADMIN) && !content.getMember().getMemberId().equals(member.getMemberId())) {
+            throw new BoardErrorException(BoardErrorCode.USER_MISS_MATCH);
         }
 
         content.updateContent(req);
@@ -99,8 +101,8 @@ public class BoardService {
         Member member = memberRepository.findById(securityUser.getMemberId())
                 .orElseThrow(() -> new MemberErrorException(MemberErrorCode.INVALID_USER));
 
-        if (!member.getRole().equals(MemberRole.ADMIN) && content.getMember().getMemberId() != member.getMemberId()) {
-            throw new RuntimeException("수정 권한 없음");
+        if (!member.getRole().equals(MemberRole.ADMIN) && !content.getMember().getMemberId().equals(member.getMemberId())) {
+            throw new BoardErrorException(BoardErrorCode.USER_MISS_MATCH);
         }
 
         content.changeType(req);
@@ -110,20 +112,19 @@ public class BoardService {
         return UpdateContentRes.success(content.getBoardId());
     }
 
-    public Boolean deleteContent(Long boardId, CustomUserDetails securityUser) {
+    public void deleteContent(Long boardId, CustomUserDetails securityUser) {
         Board content = isExist(boardId);
         Member member = memberRepository.findById(securityUser.getMemberId())
                 .orElseThrow(() -> new MemberErrorException(MemberErrorCode.INVALID_USER));
 
-        if (!member.getRole().equals(MemberRole.ADMIN) && content.getMember().getMemberId() != member.getMemberId()) {
-            throw new RuntimeException("수정 권한 없음");
+        if (!member.getRole().equals(MemberRole.ADMIN) && !content.getMember().getMemberId().equals(member.getMemberId())) {
+            throw new BoardErrorException(BoardErrorCode.USER_MISS_MATCH);
         }
 
         content.deleteContent();
 
         boardRepository.save(content);
 
-        return true;
     }
 
     public Board isExist(Long boardId) {

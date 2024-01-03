@@ -45,7 +45,7 @@ public class BoardRepositoryImpl implements BoardRepositoryCustom {
     }
 
     private BooleanExpression nameEq(String name) {
-        return StringUtils.hasText(name) ? board.name.eq(name) : null;
+        return StringUtils.hasText(name) ? board.name.contains(name) : null;
     }
 
     private BooleanExpression foundAtEq(String foundAt) {

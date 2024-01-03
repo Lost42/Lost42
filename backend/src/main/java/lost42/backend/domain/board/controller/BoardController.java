@@ -3,6 +3,7 @@ package lost42.backend.domain.board.controller;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lost42.backend.common.jwt.JwtTokenValidation;
 import lost42.backend.common.response.SuccessResponse;
 import lost42.backend.common.auth.dto.CustomUserDetails;
 import lost42.backend.domain.board.dto.ChangeTypeReq;
@@ -30,6 +31,7 @@ public class BoardController {
     }
 
     // 상세 글 조회
+    @JwtTokenValidation
     @GetMapping("/getUser")
     public ResponseEntity<?> getUserContent(@RequestParam Long boardId, @AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
         return ResponseEntity.ok().body(SuccessResponse.from(boardService.getContent(boardId, securityUser)));
@@ -41,21 +43,25 @@ public class BoardController {
     }
 
     // 게시글 작성
+    @JwtTokenValidation
     @PostMapping("/add")
     public ResponseEntity<?> createContent(@Valid @RequestBody CreateContentReq req, @AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
         return ResponseEntity.ok().body(SuccessResponse.from(boardService.createContent(req, securityUser)));
     }
 
+    @JwtTokenValidation
     @PatchMapping("/update")
     public ResponseEntity<?> updateContent(@Valid @RequestBody UpdateContentReq req, @AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
         return ResponseEntity.ok().body(SuccessResponse.from(boardService.updateContent(req, securityUser)));
     }
 
+    @JwtTokenValidation
     @PatchMapping("/type")
     public ResponseEntity<?> changeType(@Valid @RequestBody ChangeTypeReq req, @AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
         return ResponseEntity.ok().body(SuccessResponse.from(boardService.changeType(req, securityUser)));
     }
 
+    @JwtTokenValidation
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteContent(@RequestParam Long boardId, @AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
         boardService.deleteContent(boardId, securityUser);

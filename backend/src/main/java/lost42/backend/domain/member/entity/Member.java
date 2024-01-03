@@ -3,6 +3,7 @@ package lost42.backend.domain.member.entity;
 import lombok.*;
 import lost42.backend.config.Auditable;
 import lost42.backend.domain.board.entity.Board;
+import lost42.backend.domain.member.converter.MemberRoleConverter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -41,6 +42,7 @@ public class Member extends Auditable {
     private String oauthProvider;
 
     @Column(name = "role", nullable = false)
+    @Convert(converter = MemberRoleConverter.class)
     private MemberRole role;
 
     @Column(name = "deleted_dt")

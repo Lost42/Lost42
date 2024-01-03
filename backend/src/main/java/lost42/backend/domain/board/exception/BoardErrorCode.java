@@ -14,7 +14,12 @@ public enum BoardErrorCode implements StatusCode {
     /**
      * 400 BAD_REQUEST
      */
-    INVALID_CONTENT(BAD_REQUEST, "게시글이 존재하지 않습니다.");
+    INVALID_CONTENT(BAD_REQUEST, "게시글이 존재하지 않습니다."),
+
+    /**
+     * 401 UNAUTORIZED
+     */
+    USER_MISS_MATCH(UNAUTHORIZED, "수정 권한이 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

@@ -38,7 +38,7 @@ public class CustomOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         attributes.updateMemberId(member.getMemberId());
 
         return new CustomOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority(member.getRole().getKey())),
+                Collections.singleton(new SimpleGrantedAuthority(member.getRole().getRole())),
                 attributes.getAttributes(),
                 attributes.getNameAttributeKey(),
                 attributes.getMemberId(),
