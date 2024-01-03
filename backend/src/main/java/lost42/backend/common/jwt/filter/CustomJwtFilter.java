@@ -40,25 +40,28 @@ public class CustomJwtFilter extends OncePerRequestFilter {
 
     private final List<String> jwtIgnoreUrl = List.of(
             "/", "/favicon.ico",
-            "/swagger", "/swagger-ui/**", "/v3/api-docs/**",
-            "/api/v1/members/signin", "/oauth2/**", "/api/v1/members/signup",
-            "/api/v1/jwt/test",
-            "/api/v1/members/find-email", "/api/v1/members/find-password", "/api/v1/members/auth",
-            "/api/v1/boards/get"
+            "/swagger", "/swagger-ui/**", "/v3/api-docs/**"
+//            "/api/v1/members/signin", "/oauth2/**", "/api/v1/members/signup",
+//            "/api/v1/jwt/test",
+//            "/api/v1/members/find-email", "/api/v1/members/find-password", "/api/v1/members/auth",
+//            "/api/v1/boards/get"
     );
 
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (ignoreTokenRequest(request)) {
-            log.info("JWT Filer: Ignoring request: {}", request.getRequestURI());
+            log.info("JWT Filter: Ignoring request: {}", request.getRequestURI());
             filterChain.doFilter(request, response);
             return;
         }
 
-        log.info("Request: {}", request);
         String accessToken = jwtTokenUtil.resolveAccessToken(request);
         String refreshToken = jwtTokenUtil.resolveRefreshToken(request);
+        if (accessToken == null && refreshToken == null) {
+            filterChain.doFilter(request,response);
+            return;
+        }
 
         // accessToken, refreshToken 시나리오
         // 1. accessToken 유효, refreshToken 유효 -> 그대로 로직 진행
@@ -66,17 +69,8 @@ public class CustomJwtFilter extends OncePerRequestFilter {
         // 3. accessToken 만료, refreshToken 유효 -> 새로운 accessToken 발급
         // 4. accessToken 만료, refreshToken 만료 -> 재 로그인 필요
 
-        // 액세스 토큰이나 refreshToken이 존재하지 않는 다면
-        if (accessToken == null) {
-            handleAuthErrorException(response, AuthErrorCode.EMPTY_ACCESS_TOKEN);
-            return;
-        } else if (refreshToken == null) {
-            handleAuthErrorException(response, AuthErrorCode.EMPTY_REFRESH_TOKEN);
-            return;
-        }
-
         // 사용이 금지된 refreshToken 이거나 존재하지 않는 refreshToken 일 경우
-        if (forbiddenTokenService.isExist(refreshToken) || !refreshTokenService.isExistRefreshToken(refreshToken)) {
+        if (!refreshTokenService.isExistRefreshToken(refreshToken) || forbiddenTokenService.isExist(refreshToken)) {
             handleAuthErrorException(response, AuthErrorCode.INVALID_REFRESH_TOKEN);
             return;
         }
