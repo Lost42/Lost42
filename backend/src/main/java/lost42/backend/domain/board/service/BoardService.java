@@ -15,7 +15,11 @@ import lost42.backend.domain.member.entity.Member;
 import lost42.backend.domain.member.exception.MemberErrorCode;
 import lost42.backend.domain.member.exception.MemberErrorException;
 import lost42.backend.domain.member.repository.MemberRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,21 +32,25 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
 
-    public List<GetBoardRes> getBoards(GetBoardReq req) {
-        List<Board> boards = boardRepository.findAllContents(req);
-        if (boards == null) {
+    @Transactional
+    public GetBoardResDto getBoards(GetBoardReq req) {
+
+        Page<Board> boardPage = boardRepository.findAllContents(req, PageRequest.of(req.getPage().intValue() - 1, 10));
+        if (boardPage.isEmpty()) {
             throw new BoardErrorException(BoardErrorCode.INVALID_CONTENT);
         }
 
-        List<GetBoardRes> response = new ArrayList<>();
+        List<Board> boards = boardPage.getContent();
+        Long total = boardPage.getTotalElements();
+
+        List<GetBoardRes> contents = new ArrayList<>();
 
         for (Board board : boards) {
-            if (board.getDeletedDt() != null)
-                continue;
-            response.add(GetBoardRes.fromContent(board));
+            contents.add(GetBoardRes.fromContent(board));
         }
 
-        return response;
+
+        return GetBoardResDto.from(contents, req.getPage(), total);
     }
 
     public GetContentRes getContent(Long boardId, CustomUserDetails securityUser) {

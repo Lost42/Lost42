@@ -17,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -58,7 +59,7 @@ public class CustomJwtFilter extends OncePerRequestFilter {
 
         String accessToken = jwtTokenUtil.resolveAccessToken(request);
         String refreshToken = jwtTokenUtil.resolveRefreshToken(request);
-        if (accessToken == null && refreshToken == null) {
+        if (!StringUtils.hasText(accessToken) || !StringUtils.hasText(refreshToken)) {
             filterChain.doFilter(request,response);
             return;
         }

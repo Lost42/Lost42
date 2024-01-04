@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 @Builder
 @Getter
 public class GetBoardRes {
-    private GetBoardRes.ContentRes contentRes;
-    private GetBoardRes.MemberRes memberRes;
+    private GetBoardRes.ContentRes board;
+    private GetBoardRes.MemberRes user;
 
     @Builder
     @Getter
@@ -63,8 +63,8 @@ public class GetBoardRes {
 
     public static GetBoardRes fromContent(Board content) {
         return GetBoardRes.builder()
-                .contentRes(GetBoardRes.ContentRes.from(content))
-                .memberRes(GetBoardRes.MemberRes.fromContent(content))
+                .board(ContentRes.from(content))
+                .user(GetBoardRes.MemberRes.fromContent(content))
                 .build();
     }
 }

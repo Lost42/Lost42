@@ -23,5 +23,5 @@ public class GetBoardReq {
     private String managedNumber;
     private String status;
     private String type;
-    private String page;
+    private Long page;
 }
