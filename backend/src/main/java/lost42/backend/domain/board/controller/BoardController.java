@@ -11,9 +11,11 @@ import lost42.backend.domain.board.dto.CreateContentReq;
 import lost42.backend.domain.board.dto.GetBoardReq;
 import lost42.backend.domain.board.dto.UpdateContentReq;
 import lost42.backend.domain.board.service.BoardService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
@@ -44,9 +46,12 @@ public class BoardController {
 
     // 게시글 작성
     @JwtTokenValidation
-    @PostMapping("/add")
-    public ResponseEntity<?> createContent(@Valid @RequestBody CreateContentReq req, @AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
-        return ResponseEntity.ok().body(SuccessResponse.from(boardService.createContent(req, securityUser)));
+    @PostMapping(value = "/add", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE}) // 이미지 파일도 같이 받기 위해 변경
+    public ResponseEntity<?> createContent(
+            @Valid @RequestPart(name = "data") CreateContentReq req,
+            @RequestPart(name = "boardImage", required = false) MultipartFile image,
+            @AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
+        return ResponseEntity.ok().body(SuccessResponse.from(boardService.createContent(req, image, securityUser)));
     }
 
     @JwtTokenValidation
