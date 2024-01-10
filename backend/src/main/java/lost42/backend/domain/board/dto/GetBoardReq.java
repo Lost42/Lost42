@@ -2,6 +2,8 @@ package lost42.backend.domain.board.dto;
 
 import lombok.Getter;
 
+import javax.validation.constraints.NotNull;
+
 /**
  *	categoryId: 1,
  * 	name: "아이폰",
@@ -23,5 +25,6 @@ public class GetBoardReq {
     private String managedNumber;
     private String status;
     private String type;
+    @NotNull
     private Long page;
 }
