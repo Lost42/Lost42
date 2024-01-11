@@ -29,8 +29,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -83,8 +86,9 @@ public class BoardService {
 
         String imageUrl = null;
 
-        if (!image.isEmpty()) {
-            imageUrl = uploadImage(image, req.getBoardName());
+        if (image != null) {
+            String variable = req.getBoardName() + LocalDate.now(); // bucket 에 저장되는 이미지 : 게시글 제목 + 현재 날짜
+            imageUrl = uploadImage(image, variable);
         }
 
         Board newContent = Board.builder()

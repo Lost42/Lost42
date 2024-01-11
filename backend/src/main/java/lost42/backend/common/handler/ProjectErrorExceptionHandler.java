@@ -1,6 +1,8 @@
 package lost42.backend.common.handler;
 
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
+import lost42.backend.common.code.ErrorCode;
 import lost42.backend.common.response.ErrorResponse;
 import lost42.backend.common.exception.GlobalErrorException;
 import lost42.backend.domain.board.exception.BoardErrorException;
@@ -38,5 +40,12 @@ public class ProjectErrorExceptionHandler {
         log.warn("handleBoardErrorException : {}", e.getMessage());
         final ErrorResponse errorResponse = ErrorResponse.of(e.getMessage());
         return ResponseEntity.status(e.getErrorCode().getHttpStatus()).body(errorResponse);
+    }
+
+    @ExceptionHandler(Exception.class)
+    protected ResponseEntity<ErrorResponse> handleException(Exception e) {
+        log.warn("handleException : {}", e.getMessage());
+        final ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR.getMessage());
+        return ResponseEntity.status(e.hashCode()).body(errorResponse);
     }
 }
