@@ -1,4 +1,4 @@
-package lost42.backend.common.Response;
+package lost42.backend.common.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;

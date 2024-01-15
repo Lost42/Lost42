@@ -25,6 +25,7 @@ public class LogInService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(req.getUserEmail(), req.getUserPassword())
         );
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         JwtTokenInfo tokenInfo = JwtTokenInfo.fromCustomUserDetails((CustomUserDetails) authentication.getPrincipal());

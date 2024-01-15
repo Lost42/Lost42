@@ -1,7 +1,7 @@
 package lost42.backend.domain.member.dto;
 
 import lombok.*;
-import lost42.backend.common.auth.MemberRole;
+import lost42.backend.domain.member.entity.MemberRole;
 import lost42.backend.domain.member.entity.Member;
 
 @Builder

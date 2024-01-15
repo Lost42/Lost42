@@ -2,12 +2,13 @@ package lost42.backend.domain.member.entity;
 
 import lombok.*;
 import lost42.backend.config.Auditable;
-import lost42.backend.common.auth.MemberRole;
+import lost42.backend.domain.board.entity.Board;
+import lost42.backend.domain.member.converter.MemberRoleConverter;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,6 +21,10 @@ public class Member extends Auditable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "member_id")
     private Long memberId;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "member")
+    private List<Board> boards = new ArrayList<>();
 
     @Column(name = "email", length = 50, nullable = false)
     private String email;
@@ -36,10 +41,8 @@ public class Member extends Auditable {
     @Column(name = "oauth_provider", length = 20)
     private String oauthProvider;
 
-    @Column(name = "refresh_token", length = 100)
-    private String refreshToken;
-
     @Column(name = "role", nullable = false)
+    @Convert(converter = MemberRoleConverter.class)
     private MemberRole role;
 
     @Column(name = "deleted_dt")

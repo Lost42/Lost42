@@ -40,7 +40,7 @@ public class CustomUserDetails implements UserDetails {
         this.memberId = member.getMemberId();
         this.oauthProvider = member.getOauthProvider();
         this.oauthId = member.getOauthId();
-        this.authorities = Arrays.stream(new String[]{member.getRole().getKey()})
+        this.authorities = Arrays.stream(new String[]{member.getRole().getRole()})
                 .map(role -> new SimpleGrantedAuthority(role))
                 .collect(Collectors.toList());
     }

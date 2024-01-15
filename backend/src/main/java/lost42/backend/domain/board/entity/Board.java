@@ -2,11 +2,20 @@ package lost42.backend.domain.board.entity;
 
 import lombok.*;
 import lost42.backend.config.Auditable;
+import lost42.backend.domain.board.converter.BoardStatusConverter;
+import lost42.backend.domain.board.converter.BoardTypeConverter;
+import lost42.backend.domain.board.dto.ChangeTypeReq;
+import lost42.backend.domain.board.dto.UpdateContentReq;
+import lost42.backend.domain.category.entity.BoardCategory;
+import lost42.backend.domain.member.entity.Member;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Table(name = "BOARD")
 @Getter
 @Builder
 @AllArgsConstructor
@@ -17,6 +26,14 @@ public class Board extends Auditable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "board_id")
     private Long boardId;
+
+    @ManyToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "board")
+    private List<BoardCategory> boardCategories = new ArrayList<>();
 
     @Column(name = "name", length = 50, nullable = false)
     private String name;
@@ -43,12 +60,34 @@ public class Board extends Auditable {
     private String managedNumber;
 
     @Column(name = "status")
-    private String status; // 추후 enum 으로 변경
+    @Convert(converter = BoardStatusConverter.class)
+    private BoardStatus status;
 
     @Column(name = "type")
-    private String type; // 추후 enum 으로 변경
+    @Convert(converter = BoardTypeConverter.class)
+    private BoardType type;
 
     @Column(name = "deleted_dt")
     private LocalDateTime deletedDt;
 
+    public Board updateContent(UpdateContentReq req) {
+        this.name = req.getBoardName();
+        this.image = req.getBoardImage();
+        this.foundAt = req.getBoardFoundAt();
+        this.foundDate = req.getBoardFoundDate();
+        this.keepingAt = req.getBoardKeepingAt();
+        this.description = req.getBoardDescription();
+
+        return this;
+    }
+
+    public Board changeType(ChangeTypeReq req) {
+        this.type = BoardType.fromString(req.getBoardType());
+        return this;
+    }
+
+    public Board deleteContent() {
+        this.deletedDt = LocalDateTime.now();
+        return this;
+    }
 }

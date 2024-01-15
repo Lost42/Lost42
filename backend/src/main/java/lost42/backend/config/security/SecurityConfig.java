@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -23,6 +24,9 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(
+        prePostEnabled = true
+)
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -31,15 +35,16 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtSecurity jwtSecurity;
-    private final String[] ignoreUrl = {
-            "/", "/favicon.ico",
-            "/oauth2/**", "/login/oauth2/**",
-            "/swagger", "/swagger-ui/**", "/v3/api-docs/**",
-            "/api/v1/members/signup",
-            "/api/v1/members/reset-password", "/api/v1/members/signin",
-            "/api/v1/jwt/test",
-            "/api/v1/members/find-email", "/api/v1/members/find-password", "/api/v1/members/auth"
-    };
+//    private final String[] ignoreUrl = {
+//            "/", "/favicon.ico",
+//            "/oauth2/**", "/login/oauth2/**",
+//            "/swagger", "/swagger-ui/**", "/v3/api-docs/**",
+//            "/api/v1/members/signup",
+//            "/api/v1/members/reset-password", "/api/v1/members/signin",
+//            "/api/v1/jwt/test",
+//            "/api/v1/members/find-email", "/api/v1/members/find-password", "/api/v1/members/auth",
+//            "/api/v1/boards/get"
+//    };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf().disable()
@@ -60,10 +65,10 @@ public class SecurityConfig {
                     .invalidateHttpSession(true)
                     .deleteCookies("JSESSIONID")
                 .and()
-                .authorizeRequests(authorize ->
-                        authorize.antMatchers(ignoreUrl).permitAll()
-                                .anyRequest().authenticated()
-                )
+//                .authorizeRequests(authorize ->
+//                        authorize.antMatchers(ignoreUrl).permitAll()
+//                                .anyRequest().authenticated()
+//                )
                 .apply(jwtSecurity)
                 .and()
                 .oauth2Login()
