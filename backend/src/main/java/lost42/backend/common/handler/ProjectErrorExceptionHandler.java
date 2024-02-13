@@ -1,12 +1,11 @@
 package lost42.backend.common.handler;
 
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import lost42.backend.common.code.ErrorCode;
 import lost42.backend.common.response.ErrorResponse;
 import lost42.backend.common.exception.GlobalErrorException;
 import lost42.backend.domain.board.exception.BoardErrorException;
+import lost42.backend.domain.category.exception.CategoryErrorException;
 import lost42.backend.domain.member.exception.MemberErrorException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -38,6 +37,13 @@ public class ProjectErrorExceptionHandler {
 
     @ExceptionHandler(BoardErrorException.class)
     protected ResponseEntity<ErrorResponse> handleBoardErrorException(BoardErrorException e) {
+        log.warn("handleBoardErrorException : {}", e.getMessage());
+        final ErrorResponse errorResponse = ErrorResponse.of(e.getMessage());
+        return ResponseEntity.status(e.getErrorCode().getHttpStatus()).body(errorResponse);
+    }
+
+    @ExceptionHandler(CategoryErrorException.class)
+    protected ResponseEntity<ErrorResponse> handleCategoryErrorException(CategoryErrorException e) {
         log.warn("handleBoardErrorException : {}", e.getMessage());
         final ErrorResponse errorResponse = ErrorResponse.of(e.getMessage());
         return ResponseEntity.status(e.getErrorCode().getHttpStatus()).body(errorResponse);
