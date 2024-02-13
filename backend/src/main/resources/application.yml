@@ -79,6 +79,7 @@ springdoc:
   api-docs:
     groups:
       enabled: true
+
 cloud:
   aws:
     credentials:
@@ -93,5 +94,6 @@ application:
   bucket:
     name: ${BUCKET_NAME}
 
-
-
+slack:
+  token: ${SLACK_BOT_TOKEN}
+  channel: ${SLACK_CHANNEL}

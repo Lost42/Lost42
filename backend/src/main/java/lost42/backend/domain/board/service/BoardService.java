@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lost42.backend.common.slack.SlackService;
 import lost42.backend.domain.board.entity.BoardStatus;
 import lost42.backend.domain.board.entity.BoardType;
 import lost42.backend.domain.board.exception.BoardErrorCode;
@@ -45,6 +46,7 @@ public class BoardService {
     private final AmazonS3 amazonS3;
     private final BoardRepository boardRepository;
     private final MemberRepository memberRepository;
+    private final SlackService slackService;
 
     @Transactional
     public GetBoardResDto getBoards(GetBoardReq req) {
@@ -105,6 +107,8 @@ public class BoardService {
                 .build();
 
         boardRepository.save(newContent);
+
+        slackService.sendSlackMessage("새로운 게시글이 등록되었습니다. " + newContent.getName());
 
         return CreateContentRes.from(newContent);
     }
