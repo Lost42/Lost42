@@ -55,12 +55,6 @@ public class JwtTokenUtil {
     /**
      * 액세스 토큰을 이용
      */
-    // 토큰의 유효성 검사
-    public boolean validateAccessToken(String accessToken, CustomUserDetails userDetails) {
-        final Long memberId = extractMemberIdWithAccessToken(accessToken);
-        return (memberId == userDetails.getMemberId());
-    }
-
     public Date extractExpirationWithAccessToken(String accessToken) {
         return extractClaimsWithAccessToken(accessToken).getExpiration();
     }
@@ -76,17 +70,13 @@ public class JwtTokenUtil {
                 .parseSignedClaims(accessToken).getPayload();
     }
 
-    private Long extractMemberIdWithAccessToken(String accessToken) {
-        return extractClaimsWithAccessToken(accessToken).get("id", Long.class);
-    }
-
     /**
      * 리프레시 토큰을 이용
      */
     // 토큰의 유효성 검사
-    public Boolean validateRefreshToken(String refreshToken, CustomUserDetails userDetails) {
-        final Long memberId = extractMemberIdWithRefreshToken(refreshToken);
-        return (memberId == userDetails.getMemberId());
+    public Boolean validateRefreshToken(String refreshToken) {
+        Jwts.parser().verifyWith(refreshSecretKey).build().parseSignedClaims(refreshToken);
+        return true;
     }
 
     public Date extractExpirationWithRefreshToken(String refreshToken) {
@@ -102,9 +92,5 @@ public class JwtTokenUtil {
     private Claims extractClaimsWithRefreshToken(String refreshToken) {
         return Jwts.parser().verifyWith(refreshSecretKey).build()
                 .parseSignedClaims(refreshToken).getPayload();
-    }
-
-    private Long extractMemberIdWithRefreshToken(String refreshToken) {
-        return extractClaimsWithRefreshToken(refreshToken).get("id", Long.class);
     }
 }

@@ -21,6 +21,9 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
+
+import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 @Configuration
 @EnableWebSecurity
@@ -35,16 +38,19 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtSecurity jwtSecurity;
-//    private final String[] ignoreUrl = {
-//            "/", "/favicon.ico",
-//            "/oauth2/**", "/login/oauth2/**",
+    private final String[] ignoreUrl = {
+            "/", "/favicon.ico",
+            "/oauth2/**"
 //            "/swagger", "/swagger-ui/**", "/v3/api-docs/**",
 //            "/api/v1/members/signup",
 //            "/api/v1/members/reset-password", "/api/v1/members/signin",
 //            "/api/v1/jwt/test",
 //            "/api/v1/members/find-email", "/api/v1/members/find-password", "/api/v1/members/auth",
 //            "/api/v1/boards/get"
-//    };
+    };
+    private List<String> corsOrigins = List.of("http://localhost:3000");
+
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.csrf().disable()
@@ -65,10 +71,9 @@ public class SecurityConfig {
                     .invalidateHttpSession(true)
                     .deleteCookies("JSESSIONID")
                 .and()
-//                .authorizeRequests(authorize ->
-//                        authorize.antMatchers(ignoreUrl).permitAll()
-//                                .anyRequest().authenticated()
-//                )
+                .authorizeRequests(authorize ->
+                        authorize.antMatchers(ignoreUrl).permitAll()
+                )
                 .apply(jwtSecurity)
                 .and()
                 .oauth2Login()
@@ -81,13 +86,14 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("*");
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"));
-//        configuration.setAllowCredentials(true);
-
+        configuration.setAllowedOrigins(corsOrigins);
+        configuration.setAllowedMethods(List.of("GET", "POST", "OPTIONS", "PUT", "PATCH", "DELETE"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setMaxAge(3600L);
+//        configuration.setExposedHeaders(List.of(SET_COOKIE, "accessToken", AuthConstants.REFRESH_TOKEN.getValue()));
+        configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-
         return source;
     }
 

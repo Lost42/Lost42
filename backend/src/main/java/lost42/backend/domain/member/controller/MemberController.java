@@ -36,8 +36,8 @@ public class MemberController {
     private final EmailService emailService;
     private final AuthTokenService authTokenService;
 
-    @JwtTokenValidation // 필요할까??? -> token이 없다면 객체 자체가 생성되지 않아 Authentication 객체가 null 인데... 차라리 PreAuthorize를 제외하자
-//    @PreAuthorize("isAuthenticated()")
+//    @JwtTokenValidation // 필요할까??? -> token이 없다면 객체 자체가 생성되지 않아 Authentication 객체가 null 인데... 차라리 PreAuthorize를 제외하자
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/my")
     public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal @Parameter(hidden = true) CustomUserDetails securityUser) {
         return ResponseEntity.ok().body(SuccessResponse.from(memberService.getUserInfo(securityUser)));
@@ -57,7 +57,7 @@ public class MemberController {
                 .secure(true)
                 .build();
 
-        return ResponseEntity.ok().headers(headers).header("Set-Cookie", cookie.toString()).body("");
+        return ResponseEntity.ok().headers(headers).header("Set-Cookie", cookie.toString()).body(SuccessResponse.noContent());
     }
 
     @PostMapping("/signup")

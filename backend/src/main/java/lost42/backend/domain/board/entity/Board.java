@@ -7,6 +7,7 @@ import lost42.backend.domain.board.converter.BoardTypeConverter;
 import lost42.backend.domain.board.dto.ChangeTypeReq;
 import lost42.backend.domain.board.dto.UpdateContentReq;
 import lost42.backend.domain.category.entity.BoardCategory;
+import lost42.backend.domain.category.entity.Category;
 import lost42.backend.domain.member.entity.Member;
 
 import javax.persistence.*;
@@ -31,9 +32,9 @@ public class Board extends Auditable {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "board")
-    private List<BoardCategory> boardCategories = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @Column(name = "name", length = 50, nullable = false)
     private String name;
@@ -88,6 +89,16 @@ public class Board extends Auditable {
 
     public Board deleteContent() {
         this.deletedDt = LocalDateTime.now();
+        return this;
+    }
+
+    public Board addCategory(Category category) {
+        this.category = category;
+        return this;
+    }
+
+    public Board deleteCategory() {
+        this.category = null;
         return this;
     }
 }

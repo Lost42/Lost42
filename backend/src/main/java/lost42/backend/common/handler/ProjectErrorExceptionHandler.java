@@ -1,6 +1,7 @@
 package lost42.backend.common.handler;
 
-import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import lost42.backend.common.code.ErrorCode;
 import lost42.backend.common.response.ErrorResponse;
@@ -40,6 +41,13 @@ public class ProjectErrorExceptionHandler {
         log.warn("handleBoardErrorException : {}", e.getMessage());
         final ErrorResponse errorResponse = ErrorResponse.of(e.getMessage());
         return ResponseEntity.status(e.getErrorCode().getHttpStatus()).body(errorResponse);
+    }
+
+    @ExceptionHandler(NullPointerException.class)
+    protected ResponseEntity<ErrorResponse> handleNullPointerException(NullPointerException e) {
+        log.warn("handleNullPointerException : {}", e.getMessage());
+        final ErrorResponse response = ErrorResponse.of(ErrorCode.NULL_POINTER_ERROR.getMessage());
+        return ResponseEntity.internalServerError().body(response);
     }
 
     @ExceptionHandler(Exception.class)

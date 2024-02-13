@@ -41,7 +41,8 @@ public class CustomJwtFilter extends OncePerRequestFilter {
 
     private final List<String> jwtIgnoreUrl = List.of(
             "/", "/favicon.ico",
-            "/swagger", "/swagger-ui/**", "/v3/api-docs/**"
+            "/swagger", "/swagger-ui/**", "/v3/api-docs/**",
+            "/oauth2/**"
 //            "/api/v1/members/signin", "/oauth2/**", "/api/v1/members/signup",
 //            "/api/v1/jwt/test",
 //            "/api/v1/members/find-email", "/api/v1/members/find-password", "/api/v1/members/auth",
@@ -64,49 +65,51 @@ public class CustomJwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // accessToken, refreshToken 시나리오
-        // 1. accessToken 유효, refreshToken 유효 -> 그대로 로직 진행
-        // 2. accessToken 유효, refreshToken 만료 -> 새로운 refreshToken 발급한 후에 로직 그대로 진행
-        // 3. accessToken 만료, refreshToken 유효 -> 새로운 accessToken 발급
-        // 4. accessToken 만료, refreshToken 만료 -> 재 로그인 필요
+        // AccessToken, RefreshToken 시나리오
+        // (0) AT, RT 없을 경우 -> 예외 처리
+        // (1) AT 만료X (RT 존재 및 유효 유무 판단만 하고 만료 판단은 하지 않는다)
+        // (1-1) RT가 존재하고 서명이 맞을 경우 : 인증된 것으로 판정, (1-2) RT가 존재하지만 서명이 틀린 경우 : RT 서명 오류 예외
+        // (2) AT 만료O (RT 존재 및 유효 유무와 만료되었는지 여부 판단)
+        // (2-1) RT 존재O, 유효O, 만료X -> AT 재발급
+        // (2-2) RT 존재O, 유효O, 만료O -> 로그인 요청
 
-        // 사용이 금지된 refreshToken 이거나 존재하지 않는 refreshToken 일 경우
-        if (!refreshTokenService.isExistRefreshToken(refreshToken) || forbiddenTokenService.isExist(refreshToken)) {
-            handleAuthErrorException(response, AuthErrorCode.INVALID_REFRESH_TOKEN);
-            return;
+//        if (!StringUtils.hasText(accessToken)) {
+//            handleAuthErrorException(response, AuthErrorCode.EMPTY_ACCESS_TOKEN);
+//            return;
+//        } else if (!StringUtils.hasText(refreshToken)) {
+//            handleAuthErrorException(response, AuthErrorCode.EMPTY_REFRESH_TOKEN);
+//            return;
+//        }
+
+        // AT 만료 체크
+        boolean isExpireAccess = jwtTokenUtil.isTokenExpiredWithAccessToken(accessToken);
+        boolean isValidRefresh = jwtTokenUtil.validateRefreshToken(refreshToken);
+        boolean isForbiddenRefresh = forbiddenTokenService.isExist(refreshToken);
+        log.warn("isForbiddenRefresh: {}", isForbiddenRefresh);
+
+        if (isExpireAccess) {
+            if (!isForbiddenRefresh || isValidRefresh) {
+                boolean isExpireRefresh = jwtTokenUtil.isTokenExpiredWithRefreshToken(refreshToken);
+                if (isExpireRefresh) {
+                    handleAuthErrorException(response, AuthErrorCode.NEED_LOGIN);
+                } else {
+                    CustomUserDetails userDetails = (CustomUserDetails) getUserDetails(accessToken);
+                    String newAccessToken = tokenProvider.generateAccessToken(JwtTokenInfo.fromCustomUserDetails(userDetails));
+                    response.addHeader("Authorization", "Bearer " + newAccessToken);
+                    return;
+                }
+            } else {
+                handleAuthErrorException(response, AuthErrorCode.FAILED_AUTHENTICATION);
+            }
         }
 
-        // 존재하지 않는 user 라면 (accessToken 조작)
         CustomUserDetails securityUser = (CustomUserDetails) getUserDetails(accessToken);
         if (securityUser == null) {
             handleAuthErrorException(response, AuthErrorCode.FAILED_AUTHENTICATION);
             return;
         }
 
-        // 정상적인 토큰인가 (멤버 id비교)?
-        boolean validAccess = jwtTokenUtil.validateAccessToken(accessToken, securityUser);
-        boolean validRefresh = jwtTokenUtil.validateRefreshToken(refreshToken, securityUser);
-        if (!validAccess || !validRefresh) {
-            handleAuthErrorException(response, AuthErrorCode.FAILED_AUTHENTICATION);
-            return;
-        }
-
-        // 만료된 토큰인가?
-        boolean isExpireAccess = jwtTokenUtil.isTokenExpiredWithAccessToken(accessToken);
-        boolean isExpireRefresh = jwtTokenUtil.isTokenExpiredWithRefreshToken(refreshToken);
-        if (isExpireAccess) {
-            if (!isExpireRefresh) {
-                String newAccessToken = tokenProvider.generateAccessToken(JwtTokenInfo.fromCustomUserDetails(securityUser));
-
-                response.setHeader("Authorization", "Bearer " + newAccessToken);
-            } else {
-                handleAuthErrorException(response, AuthErrorCode.NEED_LOGIN);
-                return;
-            }
-        }
-
         setAuthenticationUser(securityUser, request);
-
         filterChain.doFilter(request, response);
     }
 
