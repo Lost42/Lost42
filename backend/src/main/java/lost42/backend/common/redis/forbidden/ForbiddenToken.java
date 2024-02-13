@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.index.Indexed;
 
 @RedisHash("forbiddenToken")
 @Builder
@@ -13,6 +14,7 @@ import org.springframework.data.redis.core.RedisHash;
 public class ForbiddenToken {
     @Id
     private final Long id;
+    @Indexed
     private final String token;
 
     @Builder

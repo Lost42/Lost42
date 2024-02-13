@@ -16,6 +16,7 @@ public class ForbiddenTokenService {
     }
 
     public boolean isExist(String refreshToken) {
+        log.warn("forbiddenTokenService: {}", refreshToken);
         return forbiddenTokenRepository.existsByToken(refreshToken);
     }
 }

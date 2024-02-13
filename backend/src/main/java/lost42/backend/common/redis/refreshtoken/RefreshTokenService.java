@@ -37,25 +37,4 @@ public class RefreshTokenService {
 
         refreshTokenRepository.save(save);
     }
-
-//    public String reissueRefreshToken(String accessToken) {
-//        RefreshToken refreshToken = RefreshToken.builder()
-//                .memberId(tokenProvider.getId(accessToken))
-//                .token(accessToken)
-//                .build();
-//
-//        return "";
-//    }
-
-    public boolean isExistRefreshToken(String refreshToken) {
-        RefreshToken saved = refreshTokenRepository.findById(tokenProvider.getIdWithRefreshToken(refreshToken))
-                .orElse(null);
-
-        if (saved == null) {
-            log.warn("RefreshToken is not found");
-            return false;
-        }
-
-        return true;
-    }
 }

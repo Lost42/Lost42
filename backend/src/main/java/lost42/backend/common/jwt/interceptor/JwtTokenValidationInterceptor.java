@@ -1,12 +1,8 @@
 package lost42.backend.common.jwt.interceptor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lost42.backend.common.auth.dto.CustomUserDetails;
 import lost42.backend.common.auth.exception.AuthErrorCode;
-import lost42.backend.common.auth.service.CustomUserDetailsService;
-import lost42.backend.common.jwt.JwtTokenUtil;
 import lost42.backend.common.jwt.JwtTokenValidation;
 import lost42.backend.common.response.ErrorResponse;
 import org.springframework.core.annotation.AnnotationUtils;

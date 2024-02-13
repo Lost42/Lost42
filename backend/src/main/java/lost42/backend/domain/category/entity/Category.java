@@ -23,8 +23,7 @@ public class Category extends Auditable {
 
     @Builder.Default
     @OneToMany(mappedBy = "category")
-    private List<BoardCategory> boardCategories = new ArrayList<>();
-
+    private List<Board> boards = new ArrayList<>();
 
     @Column(name = "name", length = 50, nullable = false)
     private String name;
